@@ -120,6 +120,7 @@ public class MemberApiController {
     /**
      * 내 정보 단일 조회 API (DB에서 최신 데이터 조회로 최적화)
      */
+    @Operation(summary = "정보 단일 조회", description = "현재 로그인된 사용자의 정보를 조회해 온다.")
     @GetMapping("/api/members/me")
     public MemberApiResponse<LoginResponse> getMyInfo(@SessionAttribute(name = LOGIN_MEMBER) SessionMember loginMember) {
 
