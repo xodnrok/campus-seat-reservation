@@ -2,6 +2,7 @@ package project.jpa.Init;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import project.jpa.enums.SpaceType;
 import project.jpa.repository.MemberRepository;
 import project.jpa.repository.SeatRepository;
 
+@Profile("!test") // 💡 추가: test 환경이 아닐 때만 작동!
 @Component
 @RequiredArgsConstructor
 public class InitDb {
