@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>실시간 좌석 조회 - 서일대학교 통합 좌석 관리</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+  <style>
+    body { background-color: #f8f9fa; }
+    .navbar-brand img { height: 40px; margin-right: 10px; }
+
+    .search-filter-card {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        padding: 1.5rem;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .room-card {
+        background: white;
+        border-radius: 1rem;
+        border: 2px solid transparent;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    .room-card:hover {
+        border-color: #0d6efd;
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(13, 110, 253, 0.15);
+    }
+
+    .seat-grid-container {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        padding: 2rem;
+        overflow-x: auto;
+        display: flex;
+        justify-content: center;
+    }
+
+    .seat-grid {
+        display: grid;
+        gap: 12px;
+    }
+
+    /* 개별 좌석 기본 (회색 바탕 고정) */
+    .seat-item {
+        width: 65px;
+        height: 65px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        background-color: #6c757d;
+        opacity: 0.8;
+    }
+
+    .seat-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+    }
+
+    /* 상태별 덮어쓰기 */
+    .status-AVAILABLE { background-color: #0d6efd; opacity: 1; }
+    .status-USING { cursor: not-allowed; }
+    .status-MAINTENANCE { background-color: #ffc107; color: #212529; cursor: not-allowed; opacity: 1; }
+
+    .legend-dot {
+        width: 15px; height: 15px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+        vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top position-relative">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand d-flex align-items-center m-0" href="/">
+      <img src="/images/logo.png" alt="서일대학교 로고">
+      <span class="fw-bold fs-4 text-primary" style="letter-spacing: -1px;">서일대학교</span>
+    </a>
+    <div class="position-absolute start-50 translate-middle-x d-none d-md-block">
+      <span class="fw-bold fs-5 text-dark">통합 좌석 관리 시스템</span>
+    </div>
+    <div class="collapse navbar-collapse justify-content-end">
+      <ul class="navbar-nav align-items-center gap-3">
+        <th:block th:if="${session.loginMember == null}">
+          <li class="nav-item"><a class="nav-link fw-semibold" href="/login">로그인</a></li>
+          <li class="nav-item"><a class="btn btn-primary btn-sm rounded-pill px-4 py-2 fw-bold" href="/login#join">회원가입</a></li>
+        </th:block>
+        <th:block th:unless="${session.loginMember == null}">
+          <li class="nav-item me-2">
+            <span class="fw-bold text-primary" th:text="${session.loginMember.name} + '님'"></span>
+            <span class="text-secondary fw-semibold">어서오세요!</span>
+          </li>
+          <li class="nav-item"><a class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold" href="/mypage">마이페이지</a></li>
+        </th:block>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main class="container">
+
+  <div class="search-filter-card">
+    <h5 class="fw-bold mb-3"><i class="bi bi-search text-primary"></i> 공간 검색</h5>
+    <form id="searchForm" class="row g-3 align-items-end">
+
+      <div class="col-md-2">
+        <label class="form-label text-muted fw-semibold">건물명</label>
+        <select class="form-select" id="buildingName">
+          <option value="">전체 건물</option>
+          <option value="호천관">호천관</option>
+          <option value="흥학관">흥학관</option>
+          <option value="학생회관">학생회관</option>
+          <option value="세종관">세종관</option>
+          <option value="배양관">배양관</option>
+          <option value="누리관">누리관</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label text-muted fw-semibold">층수</label>
+        <select class="form-select" id="floor">
+          <option value="">전체 층수</option>
+          <option value="-2">지하 2층</option>
+          <option value="1">1층</option>
+          <option value="2">2층</option>
+          <option value="3">3층</option>
+          <option value="4">4층</option>
+          <option value="5">5층</option>
+          <option value="6">6층</option>
+          <option value="7">7층</option>
+          <option value="8">8층</option>
+          <option value="9">9층</option>
+          <option value="10">10층</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label text-muted fw-semibold">공간 유형</label>
+        <select class="form-select" id="spaceType">
+          <option value="">전체 유형</option>
+          <option value="STUDY_LOUNGE">스터디 라운지 (공부)</option>
+          <option value="REST_AREA">휴식 공간 (휴게실)</option>
+          <option value="DINING_AREA">취식 공간 (식당/카페)</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label text-muted fw-semibold text-primary">필요 인원 (잔여 좌석)</label>
+        <select class="form-select border-primary" id="requiredSeats">
+          <option value="0">전체 보기 (매진 포함)</option>
+          <option value="1" selected>1명 (1자리 이상 남음)</option>
+          <option value="2">2명 (2자리 이상 남음)</option>
+          <option value="3">3명 (3자리 이상 남음)</option>
+          <option value="4">4명 이상 (여유로움)</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100 fw-bold">조회하기</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="roomListArea" class="row g-4 mb-5"></div>
+
+  <div id="seatGridArea" style="display: none;" class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 id="gridTitle" class="fw-bold text-primary m-0"></h4>
+      <button class="btn btn-outline-secondary btn-sm fw-bold rounded-pill px-3" onclick="showRoomList()">
+        <i class="bi bi-arrow-left"></i> 목록으로 돌아가기
+      </button>
+    </div>
+    <div class="d-flex justify-content-end mb-2 gap-3 fw-semibold text-secondary">
+      <div><span class="legend-dot bg-primary"></span>이용 가능</div>
+      <div><span class="legend-dot bg-secondary"></span>사용 중</div>
+      <div><span class="legend-dot bg-warning"></span>점검 중</div>
+    </div>
+    <div class="seat-grid-container">
+      <div id="seatGrid" class="seat-grid"></div>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  let groupedRooms = {};
+
+  document.addEventListener("DOMContentLoaded", fetchSeats);
+
+  document.getElementById('searchForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      fetchSeats();
+  });
+
+  function fetchSeats() {
+      const building = document.getElementById('buildingName').value;
+      const floor = document.getElementById('floor').value;
+      const spaceType = document.getElementById('spaceType').value;
+
+      const url = `/api/seats?buildingName=${building}&floor=${floor}&spaceType=${spaceType}`;
+
+      fetch(url)
+          .then(response => response.json())
+          .then(data => {
+              if (data.status === 'SUCCESS') {
+                  processRoomData(data.data);
+              } else {
+                  Swal.fire('오류', data.message, 'error');
+              }
+          })
+          .catch(error => {
+              console.error('Error:', error);
+              Swal.fire('통신 오류', '좌석 정보를 불러오는 데 실패했습니다.', 'error');
+          });
+  }
+
+  function processRoomData(seats) {
+      groupedRooms = {};
+
+      seats.forEach(seat => {
+          // 방의 고유 키 생성 시 층수에 "층"을 붙여서 보기 좋게 만듭니다 (지하도 처리 가능)
+          const floorStr = seat.floor < 0 ? `지하 ${Math.abs(seat.floor)}` : seat.floor;
+          const roomKey = `${seat.buildingName}_${floorStr}_${seat.spaceType}`;
+
+          if (!groupedRooms[roomKey]) {
+              groupedRooms[roomKey] = {
+                  buildingName: seat.buildingName,
+                  floorStr: floorStr,
+                  spaceType: seat.spaceType,
+                  totalSeats: 0,
+                  availableSeats: 0,
+                  seatsList: []
+              };
+          }
+
+          groupedRooms[roomKey].totalSeats++;
+          if (seat.status === 'AVAILABLE') {
+              groupedRooms[roomKey].availableSeats++;
+          }
+          groupedRooms[roomKey].seatsList.push(seat);
+      });
+
+      renderRoomCards();
+  }
+
+  function renderRoomCards() {
+      document.getElementById('roomListArea').style.display = 'flex';
+      document.getElementById('seatGridArea').style.display = 'none';
+
+      const listArea = document.getElementById('roomListArea');
+      listArea.innerHTML = '';
+
+      const keys = Object.keys(groupedRooms);
+
+      // 💡 선택된 필요 인원(최소 잔여 좌석 수) 값 가져오기
+      const requiredSeats = parseInt(document.getElementById('requiredSeats').value, 10);
+
+      let renderedCardCount = 0;
+
+      keys.forEach(key => {
+          const room = groupedRooms[key];
+
+          // 💡 [핵심] 방의 남은 자리가 사용자가 원하는 인원수보다 적으면 카드 렌더링을 건너뜀!
+          if (room.availableSeats < requiredSeats) {
+              return;
+          }
+
+          const typeName = getSpaceTypeName(room.spaceType);
+          const availableClass = room.availableSeats > 0 ? 'text-primary' : 'text-danger';
+
+          const cardHtml = `
+              <div class="col-md-4">
+                  <div class="card room-card h-100 p-4" onclick="openSeatGrid('${key}')">
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                          <span class="badge bg-secondary fs-6">${room.buildingName} ${room.floorStr}층</span>
+                      </div>
+                      <h4 class="fw-bold mb-3">${typeName}</h4>
+                      <div class="d-flex justify-content-between align-items-center mt-auto border-top pt-3">
+                          <span class="text-muted fw-semibold">잔여 좌석</span>
+                          <span class="fs-4 fw-bold ${availableClass}">${room.availableSeats} <span class="fs-6 text-muted">/ ${room.totalSeats}</span></span>
+                      </div>
+                  </div>
+              </div>
+          `;
+          listArea.innerHTML += cardHtml;
+          renderedCardCount++;
+      });
+
+      if (renderedCardCount === 0) {
+          listArea.innerHTML = '<div class="col-12"><h5 class="text-muted mt-5 p-5 text-center bg-white rounded-3 shadow-sm border">선택하신 인원이 들어갈 수 있는 공간이 없습니다.</h5></div>';
+      }
+  }
+
+  function openSeatGrid(roomKey) {
+      const room = groupedRooms[roomKey];
+      document.getElementById('gridTitle').innerText = `[${room.buildingName} ${room.floorStr}층] ${getSpaceTypeName(room.spaceType)}`;
+      document.getElementById('roomListArea').style.display = 'none';
+      document.getElementById('seatGridArea').style.display = 'block';
+      renderSeatGrid(room.seatsList);
+  }
+
+  function showRoomList() {
+      document.getElementById('roomListArea').style.display = 'flex';
+      document.getElementById('seatGridArea').style.display = 'none';
+      fetchSeats();
+  }
+
+  function renderSeatGrid(seats) {
+      const grid = document.getElementById('seatGrid');
+      grid.innerHTML = '';
+
+      const maxRow = Math.max(...seats.map(s => s.rowIndex || 1));
+      const maxCol = Math.max(...seats.map(s => s.colIndex || 1));
+
+      grid.style.gridTemplateColumns = `repeat(${maxCol}, 65px)`;
+      grid.style.gridTemplateRows = `repeat(${maxRow}, 65px)`;
+
+      seats.forEach(seat => {
+          const seatDiv = document.createElement('div');
+          seatDiv.className = `seat-item status-${seat.status}`;
+          seatDiv.innerText = seat.seatNumber;
+
+          seatDiv.style.gridRow = seat.rowIndex;
+          seatDiv.style.gridColumn = seat.colIndex;
+
+          seatDiv.onclick = () => handleSeatClick(seat);
+          grid.appendChild(seatDiv);
+      });
+  }
+
+  function getSpaceTypeName(type) {
+      if(type === 'STUDY_LOUNGE') return '스터디 라운지';
+      if(type === 'REST_AREA') return '휴식 공간';
+      if(type === 'DINING_AREA') return '취식 공간';
+      return type;
+  }
+
+  // ==========================================
+  // 💡 [수정 완료] 좌석 클릭 시 모달창 띄우기 로직 (신고 버튼 제거)
+  // ==========================================
+  function handleSeatClick(seat) {
+      // 1. 점검 중인 좌석
+      if (seat.status === 'MAINTENANCE') {
+          Swal.fire('이용 불가', '현재 점검 중인 좌석입니다.', 'warning');
+          return;
+      }
+
+      // 2. 다른 사람이 사용 중인 좌석 (IN_USE)
+      if (seat.status === 'IN_USE' || seat.status === 'USING') {
+          Swal.fire('이용 불가', '이미 다른 사용자가 이용 중인 좌석입니다.', 'info');
+          return;
+      }
+
+      // 3. 이용 가능한 좌석 클릭 시 (예약 / 즐겨찾기 2가지만 제공)
+      Swal.fire({
+          title: `[${seat.seatNumber}] 좌석 선택`,
+          text: "원하시는 작업을 선택해주세요.",
+          showDenyButton: true,
+          showCancelButton: true,
+          confirmButtonText: '<i class="bi bi-check-circle"></i> 예약하기',
+          confirmButtonColor: '#0d6efd',
+          denyButtonText: '<i class="bi bi-heart-fill"></i> 즐겨찾기',
+          denyButtonColor: '#dc3545',
+          cancelButtonText: '닫기'
+      }).then((result) => {
+          if (result.isConfirmed) {
+              // 예약하기 클릭
+              reserveSeat(seat.seatId);
+          } else if (result.isDenied) {
+              // 즐겨찾기 클릭
+              toggleBookmark(seat.seatId);
+          }
+      });
+  }
+
+  // ==========================================
+  // 💡 공통 에러 처리 (비회원 튕겨내기)
+  // ==========================================
+  function handleApiError(title, message) {
+      if (message.includes('로그인')) {
+          Swal.fire({
+              icon: 'info',
+              title: '로그인이 필요합니다',
+              text: '이용을 위해 로그인 페이지로 이동합니다.',
+              confirmButtonColor: '#0d6efd',
+              timer: 1500,
+              timerProgressBar: true
+          }).then(() => {
+              window.location.href = '/login#login-pane';
+          });
+      } else {
+          Swal.fire(title, message, 'error');
+      }
+  }
+
+  function reserveSeat(seatId) {
+      fetch(`/api/seats/${seatId}/start`, { method: 'POST' })
+          .then(res => res.json())
+          .then(data => {
+              if (data.status === 'SUCCESS') {
+                  // 💡 예약 성공 시 마이페이지로 이동!
+                  Swal.fire({
+                      icon: 'success',
+                      title: '예약 완료!',
+                      text: '마이페이지로 이동하여 현황을 확인하세요.',
+                      timer: 1500,
+                      showConfirmButton: false
+                  }).then(() => {
+                      window.location.href = '/mypage';
+                  });
+              } else {
+                  handleApiError('예약 실패', data.message);
+              }
+          }).catch(() => Swal.fire('통신 오류', '서버와 통신할 수 없습니다.', 'error'));
+  }
+
+  function toggleBookmark(seatId) {
+      fetch(`/api/bookmarks/${seatId}`, { method: 'POST' })
+          .then(res => res.json())
+          .then(data => {
+              if (data.status === 'SUCCESS') {
+                  Swal.fire('즐겨찾기', data.message, 'success');
+              } else {
+                  handleApiError('즐겨찾기 실패', data.message);
+              }
+          }).catch(() => Swal.fire('통신 오류', '서버와 통신할 수 없습니다.', 'error'));
+  }
+
+  function openReportModal(seatId) {
+      Swal.fire({
+          title: '고장 신고',
+          input: 'textarea',
+          inputLabel: '고장 내역을 상세히 적어주세요',
+          inputPlaceholder: '내용을 입력하세요...',
+          showCancelButton: true,
+          confirmButtonText: '신고 접수',
+          cancelButtonText: '취소',
+          inputValidator: (value) => {
+              if (!value) return '신고 내용을 입력해주세요!';
+          }
+      }).then((result) => {
+          if (result.isConfirmed) {
+              fetch('/api/reports', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ seatId: seatId, content: result.value })
+              })
+              .then(res => res.json())
+              .then(data => {
+                  if (data.status === 'SUCCESS') {
+                      Swal.fire('접수 완료', data.message, 'success');
+                  } else {
+                      handleApiError('신고 실패', data.message);
+                  }
+              }).catch(() => Swal.fire('통신 오류', '서버와 통신할 수 없습니다.', 'error'));
+          }
+      });
+  }
+</script>
+</body>
+</html>

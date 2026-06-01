@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 대시보드 - 서일대학교 통합 좌석 관리</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <style>
+        body { background-color: #f1f4f9; }
+        .navbar-brand img { height: 40px; margin-right: 10px; }
+        .sidebar { background: #212529; border-radius: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 1.5rem 1rem; color: white; min-height: calc(100vh - 120px); }
+        .list-group-item { background-color: transparent; border: none; padding: 1rem 1.5rem; border-radius: 0.5rem !important; margin-bottom: 0.5rem; color: #adb5bd; font-weight: 600; transition: all 0.2s ease; cursor: pointer; }
+        .list-group-item:hover { color: white; background-color: rgba(255,255,255,0.1); }
+        .list-group-item.active { background-color: #0d6efd; color: white; box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3); }
+        .list-group-item i { margin-right: 10px; font-size: 1.2rem; vertical-align: middle; }
+        .content-card { background: white; border-radius: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 2.5rem; min-height: calc(100vh - 120px); }
+        .custom-table th { background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; color: #495057; font-weight: bold; }
+        .custom-table td { vertical-align: middle; }
+        .page-link { cursor: pointer; }
+
+        .seat-box {
+            width: 50px; height: 50px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .seat-active { background-color: #198754; color: white; border: 2px solid #146c43; }
+        .seat-active:hover { background-color: #157347; transform: scale(1.05); }
+        .seat-disabled { background-color: #e9ecef; color: #adb5bd; border: 2px dashed #ced4da; }
+        .seat-disabled:hover { background-color: #dee2e6; }
+        #gridPreviewContainer { padding: 1.5rem; background: #f8f9fa; border-radius: 1rem; border: 1px solid #dee2e6; overflow-x: auto; }
+
+        .admin-seat-grid-container {
+            background: #f8f9fa; border-radius: 1rem; border: 1px solid #dee2e6; padding: 2rem; overflow-x: auto; display: flex; justify-content: center;
+        }
+        .admin-seat-grid { display: grid; gap: 12px; }
+        .admin-seat-item {
+            width: 65px; height: 65px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1.1rem; color: white; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .admin-seat-item:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.15); }
+        .status-AVAILABLE { background-color: #0d6efd; }
+        .status-IN_USE { background-color: #6c757d; }
+        .status-MAINTENANCE { background-color: #dc3545; }
+        .legend-dot { width: 15px; height: 15px; border-radius: 50%; display: inline-block; margin-right: 5px; vertical-align: middle; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand d-flex align-items-center m-0" href="/">
+            <img src="/images/logo.png" alt="서일대학교 로고">
+            <span class="fw-bold fs-4 text-white">서일대학교 관리자 센터</span>
+        </a>
+        <div class="collapse navbar-collapse justify-content-end">
+            <ul class="navbar-nav align-items-center gap-3">
+                <li class="nav-item me-2">
+                    <span class="badge bg-danger px-3 py-2 fs-6 rounded-pill"><i class="bi bi-shield-lock-fill"></i> ADMIN 계정</span>
+                </li>
+                <li class="nav-item"><a class="btn btn-outline-light btn-sm rounded-pill px-3 fw-bold" href="/">홈으로 가기</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container-fluid px-4 my-4">
+    <div class="row g-4">
+        <div class="col-md-2">
+            <div class="sidebar">
+                <div class="text-center mb-5 mt-3">
+                    <div class="display-3 text-light mb-2"><i class="bi bi-person-bounding-box"></i></div>
+                    <h5 class="fw-bold m-0" th:text="${session.loginMember.name}">관리자</h5>
+                </div>
+                <div class="list-group">
+                    <button class="list-group-item active" id="nav-seat" onclick="switchTab('seat')">
+                        <i class="bi bi-grid-1x2-fill"></i> 시설 및 좌석 관리
+                    </button>
+                    <button class="list-group-item" id="nav-monitor" onclick="switchTab('monitor')">
+                        <i class="bi bi-display"></i> 실시간 사용자 모니터링
+                    </button>
+                    <button class="list-group-item" id="nav-report" onclick="switchTab('report')">
+                        <i class="bi bi-tools"></i> 고장 신고 처리장
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-10">
+            <div class="content-card position-relative">
+
+                <div id="section-seat" class="section-content">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold m-0">통합 시설 및 좌석 관리</h4>
+                        <button class="btn btn-primary fw-bold px-4" data-bs-toggle="modal" data-bs-target="#seatRegisterModal">
+                            <i class="bi bi-plus-circle"></i> 새 좌석 등록
+                        </button>
+                    </div>
+
+                    <div class="card bg-light border-0 mb-4 p-3">
+                        <form id="adminSearchForm" class="row g-2 align-items-end">
+                            <div class="col-md-2">
+                                <label class="form-label text-muted fw-bold small">건물명</label>
+                                <select class="form-select fw-bold" id="searchBuilding">
+                                    <option value="">전체 건물</option>
+                                    <option value="호천관">호천관</option>
+                                    <option value="흥학관">흥학관</option>
+                                    <option value="학생회관">학생회관</option>
+                                    <option value="세종관">세종관</option>
+                                    <option value="배양관">배양관</option>
+                                    <option value="누리관">누리관</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label text-muted fw-bold small">층수</label>
+                                <select class="form-select fw-bold" id="searchFloor">
+                                    <option value="">전체 층수</option>
+                                    <option value="-2">지하 2층</option>
+                                    <option value="1">1층</option>
+                                    <option value="2">2층</option>
+                                    <option value="3">3층</option>
+                                    <option value="4">4층</option>
+                                    <option value="5">5층</option>
+                                    <option value="6">6층</option>
+                                    <option value="7">7층</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label text-muted fw-bold small">장소 유형</label>
+                                <select class="form-select fw-bold" id="searchType">
+                                    <option value="">전체 유형</option>
+                                    <option value="STUDY_LOUNGE">스터디 라운지 (공부)</option>
+                                    <option value="REST_AREA">휴식 공간 (휴게실)</option>
+                                    <option value="DINING_AREA">취식 공간 (식당)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-5 d-flex gap-2">
+                                <button type="button" class="btn btn-secondary w-50 fw-bold" onclick="fetchSeatsForAdmin('TABLE')">
+                                    <i class="bi bi-list-ul"></i> 목록(표) 조회
+                                </button>
+                                <button type="button" class="btn btn-primary w-50 fw-bold" onclick="fetchSeatsForAdmin('GRID')">
+                                    <i class="bi bi-grid-3x3-gap-fill"></i> 도면(그리드) 조회
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="adminTableView" class="table-responsive">
+                        <table class="table custom-table table-hover text-center align-middle">
+                            <thead>
+                            <tr>
+                                <th>건물 / 층수</th> <th>유형</th> <th>좌석 번호</th> <th>그리드 (행, 열)</th> <th>현재 상태</th> <th>관리 액션</th>
+                            </tr>
+                            </thead>
+                            <tbody id="adminSeatTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div id="adminGridView" style="display: none;">
+                        <div class="d-flex justify-content-end mb-2 gap-3 fw-bold text-secondary">
+                            <div><span class="legend-dot bg-primary"></span>이용 가능</div>
+                            <div><span class="legend-dot bg-secondary"></span>사용 중</div>
+                            <div><span class="legend-dot bg-danger"></span>점검 중</div>
+                        </div>
+                        <div class="admin-seat-grid-container shadow-sm">
+                            <div id="adminSeatGrid" class="admin-seat-grid"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="section-monitor" class="section-content" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold m-0">실시간 사용자 모니터링</h4>
+                        <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill shadow-sm" id="monitorTotalCount">0명 이용 중</span>
+                    </div>
+
+                    <div class="alert alert-info py-2 small fw-bold mb-4">
+                        <i class="bi bi-info-circle-fill"></i> 현재 캠퍼스 내 모든 이용자를 실시간으로 모니터링합니다. 부재중이거나 짐만 놔둔 얌체 좌석은 <strong>[강제 퇴실]</strong> 처리할 수 있습니다.
+                    </div>
+
+                    <div class="card bg-light border-0 mb-4 p-3">
+                        <form id="monitorFilterForm" class="row g-2 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label text-muted fw-bold small">건물명</label>
+                                <select class="form-select fw-bold" id="monitorBuilding" onchange="fetchActiveMonitors(0)">
+                                    <option value="">전체 건물</option>
+                                    <option value="호천관">호천관</option>
+                                    <option value="흥학관">흥학관</option>
+                                    <option value="학생회관">학생회관</option>
+                                    <option value="세종관">세종관</option>
+                                    <option value="배양관">배양관</option>
+                                    <option value="누리관">누리관</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label text-muted fw-bold small">층수</label>
+                                <select class="form-select fw-bold" id="monitorFloor" onchange="fetchActiveMonitors(0)">
+                                    <option value="">전체 층수</option>
+                                    <option value="-2">지하 2층</option>
+                                    <option value="1">1층</option>
+                                    <option value="2">2층</option>
+                                    <option value="3">3층</option>
+                                    <option value="4">4층</option>
+                                    <option value="5">5층</option>
+                                    <option value="6">6층</option>
+                                    <option value="7">7층</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-muted fw-bold small">장소 유형</label>
+                                <select class="form-select fw-bold" id="monitorType" onchange="fetchActiveMonitors(0)">
+                                    <option value="">전체 유형</option>
+                                    <option value="STUDY_LOUNGE">스터디 라운지 (공부)</option>
+                                    <option value="REST_AREA">휴식 공간 (휴게실)</option>
+                                    <option value="DINING_AREA">취식 공간 (식당)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-outline-secondary w-100 fw-bold" onclick="resetMonitorFilters()">
+                                    <i class="bi bi-arrow-clockwise"></i> 초기화
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table custom-table table-hover text-center align-middle">
+                            <thead>
+                            <tr>
+                                <th>건물 / 층수</th>
+                                <th>공간 유형</th>
+                                <th>좌석 번호</th>
+                                <th>이용자 정보</th>
+                                <th>이용 시작 시간</th>
+                                <th>관리 액션</th>
+                            </tr>
+                            </thead>
+                            <tbody id="monitorTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="monitorPagination" class="d-flex justify-content-center mt-4"></div>
+                </div>
+
+                <div id="section-report" class="section-content" style="display: none;">
+                    <h4 class="fw-bold mb-4">고장 및 불편 신고 접수함</h4>
+
+                    <div class="d-flex gap-2 mb-4">
+                        <button class="btn btn-primary fw-bold filter-btn" id="filter-ALL" onclick="fetchAdminReports(0, '')">전체 보기</button>
+                        <button class="btn btn-outline-danger fw-bold filter-btn" id="filter-RECEIVED" onclick="fetchAdminReports(0, 'RECEIVED')">접수 대기</button>
+                        <button class="btn btn-outline-warning fw-bold text-dark filter-btn" id="filter-IN_PROGRESS" onclick="fetchAdminReports(0, 'IN_PROGRESS')">점검 중</button>
+                        <button class="btn btn-outline-success fw-bold filter-btn" id="filter-RESOLVED" onclick="fetchAdminReports(0, 'RESOLVED')">처리 완료</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table custom-table table-hover text-center align-middle">
+                            <thead>
+                            <tr>
+                                <th>신고 날짜</th> <th>신고자</th> <th>위치 / 좌석</th> <th>신고 내용</th> <th>상태</th> <th>관리 액션</th>
+                            </tr>
+                            </thead>
+                            <tbody id="adminReportTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div id="adminReportPagination" class="d-flex justify-content-center mt-4"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="modal fade" id="seatRegisterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"> <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title fw-bold"><i class="bi bi-plus-square"></i> 신규 좌석 등록</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+            <div class="row g-3 mb-4 pb-4 border-bottom">
+                <div class="col-md-4"><label class="form-label fw-bold text-primary">공통 건물명</label><select class="form-select fw-bold" id="regCommonBuilding" required><option value="호천관">호천관</option><option value="흥학관">흥학관</option><option value="학생회관">학생회관</option><option value="세종관">세종관</option><option value="배양관">배양관</option><option value="누리관">누리관</option></select></div>
+                <div class="col-md-4"><label class="form-label fw-bold text-primary">공통 층수</label><select class="form-select fw-bold" id="regCommonFloor" required><option value="-2">지하 2층</option><option value="1" selected>1층</option><option value="2">2층</option><option value="3">3층</option><option value="4">4층</option><option value="5">5층</option><option value="6">6층</option><option value="7">7층</option></select></div>
+                <div class="col-md-4"><label class="form-label fw-bold text-primary">공통 공간 유형</label><select class="form-select fw-bold" id="regCommonSpaceType" required><option value="STUDY_LOUNGE">스터디 라운지</option><option value="REST_AREA">휴게실</option><option value="DINING_AREA">취식 공간</option></select></div>
+            </div>
+            <ul class="nav nav-pills mb-4 nav-fill gap-2" id="registerTab" role="tablist">
+                <li class="nav-item" role="presentation"><button class="nav-link active fw-bold border" id="single-tab" data-bs-toggle="tab" data-bs-target="#single-pane" type="button" role="tab">단건(개별) 좌석 등록</button></li>
+                <li class="nav-item" role="presentation"><button class="nav-link fw-bold border" id="bulk-tab" data-bs-toggle="tab" data-bs-target="#bulk-pane" type="button" role="tab">다중 그리드(배열) 일괄 등록</button></li>
+            </ul>
+            <div class="tab-content" id="registerTabContent">
+                <div class="tab-pane fade show active" id="single-pane" role="tabpanel">
+                    <div class="row g-3">
+                        <div class="col-12"><label class="form-label fw-bold">좌석 번호 (예: A-1)</label><input type="text" class="form-control" id="regSingleSeatNum"></div>
+                        <div class="col-md-6"><label class="form-label fw-bold">그리드 행 (Row)</label><input type="number" class="form-control" id="regSingleRow" value="1" min="1"></div>
+                        <div class="col-md-6"><label class="form-label fw-bold">그리드 열 (Col)</label><input type="number" class="form-control" id="regSingleCol" value="1" min="1"></div>
+                        <div class="col-12 text-end mt-4"><button type="button" class="btn btn-secondary fw-bold me-2" data-bs-dismiss="modal">취소</button><button type="button" class="btn btn-primary fw-bold px-4" onclick="registerSingleSeat()">단건 등록하기</button></div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="bulk-pane" role="tabpanel">
+                    <div class="alert alert-info py-2 small fw-bold"><i class="bi bi-info-circle-fill"></i> 방의 크기(행/열)를 입력하고 미리보기를 생성하세요. 초록색 칸을 클릭하면 통로나 기둥(회색)으로 제외됩니다.</div>
+                    <div class="row g-2 align-items-end mb-3">
+                        <div class="col-md-2"><label class="form-label fw-bold small">총 행(Row)</label><input type="number" class="form-control" id="bulkRows" value="5" min="1" max="26"></div>
+                        <div class="col-md-2"><label class="form-label fw-bold small">총 열(Col)</label><input type="number" class="form-control" id="bulkCols" value="6" min="1"></div>
+                        <div class="col-md-3"><label class="form-label fw-bold small">명명 규칙</label><select class="form-select" id="bulkNamingRule" onchange="toggleBulkPrefix()"><option value="ALPHA">행별 알파벳 (A-1, B-1)</option><option value="PREFIX">단일 접두사 (Q-1, Q-2)</option></select></div>
+                        <div class="col-md-3" id="bulkPrefixWrapper" style="display: none;"><label class="form-label fw-bold small text-danger">접두사 입력</label><input type="text" class="form-control" id="bulkPrefix" placeholder="예: Q-" onkeyup="updateGridLabels()"></div>
+                        <div class="col-md-2"><button type="button" class="btn btn-dark w-100 fw-bold" onclick="generateGridPreview()">미리보기</button></div>
+                    </div>
+                    <div id="gridPreviewContainer" style="display: none;"></div>
+                    <div class="col-12 text-end mt-4"><button type="button" class="btn btn-secondary fw-bold me-2" data-bs-dismiss="modal">취소</button><button type="button" class="btn btn-success fw-bold px-4" onclick="submitBulkSeats()">선택된 좌석 일괄 등록</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+<div class="modal fade" id="seatEditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title fw-bold">좌석 정보 수정</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="editSeatId">
+                <form id="editForm" class="row g-3">
+                    <div class="col-md-6"><label class="form-label fw-bold">건물명</label><select class="form-select" id="editBuilding" required><option value="호천관">호천관</option><option value="흥학관">흥학관</option><option value="학생회관">학생회관</option><option value="세종관">세종관</option><option value="배양관">배양관</option><option value="누리관">누리관</option></select></div>
+                    <div class="col-md-6"><label class="form-label fw-bold">층수</label><select class="form-select" id="editFloor" required><option value="-2">지하 2층</option><option value="1">1층</option><option value="2">2층</option><option value="3">3층</option><option value="4">4층</option><option value="5">5층</option><option value="6">6층</option><option value="7">7층</option></select></div>
+                    <div class="col-12"><label class="form-label fw-bold">공간 유형</label><select class="form-select" id="editSpaceType" required><option value="STUDY_LOUNGE">스터디 라운지</option><option value="REST_AREA">휴게실</option><option value="DINING_AREA">취식 공간</option></select></div>
+                    <div class="col-12"><label class="form-label fw-bold">좌석 번호 (예: A-1)</label><input type="text" class="form-control" id="editSeatNumber" required></div>
+                    <div class="col-md-6"><label class="form-label fw-bold">행 (Row)</label><input type="number" class="form-control" id="editRow" min="1" required></div>
+                    <div class="col-md-6"><label class="form-label fw-bold">열 (Col)</label><input type="number" class="form-control" id="editCol" min="1" required></div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-info text-white fw-bold" onclick="updateSeat()">수정 완료</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    let currentReportStatus = '';
+    let currentAdminViewMode = 'TABLE';
+    let fetchedSeatsData = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+        if (window.location.hash === '#report') switchTab('report');
+        else if (window.location.hash === '#monitor') switchTab('monitor');
+        else switchTab('seat');
+    });
+
+    function handleApiError(title, message) { Swal.fire(title, message, 'error'); }
+
+    function formatDate(dateString) {
+        if(!dateString) return "-";
+        const d = new Date(dateString);
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+
+    function getSpaceTypeName(type) {
+        return (type === 'STUDY_LOUNGE') ? '스터디 라운지' : (type === 'REST_AREA') ? '휴게실' : '취식 공간';
+    }
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.list-group-item').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.section-content').forEach(el => el.style.display = 'none');
+        document.getElementById('nav-' + tabName).classList.add('active');
+        document.getElementById('section-' + tabName).style.display = 'block';
+
+        if(tabName === 'seat') {
+            document.getElementById('adminSeatTableBody').innerHTML = '<tr><td colspan="6" class="py-5 text-muted">건물명, 층수, 장소 유형을 선택하고 조회 버튼을 눌러주세요.</td></tr>';
+            document.getElementById('adminTableView').style.display = 'block';
+            document.getElementById('adminGridView').style.display = 'none';
+        }
+        else if(tabName === 'report') fetchAdminReports(0, currentReportStatus);
+        else if(tabName === 'monitor') fetchActiveMonitors(0);
+    }
+
+    function renderPagination(pageData, containerId, fetchFunctionName) {
+        const container = document.getElementById(containerId);
+        if (!pageData || pageData.totalPages <= 1) { container.innerHTML = ''; return; }
+
+        let html = '<ul class="pagination pagination-sm">';
+        const prevDisabled = pageData.first ? 'disabled' : '';
+        html += `<li class="page-item ${prevDisabled}"><a class="page-link" onclick="${fetchFunctionName}(${pageData.number - 1})">이전</a></li>`;
+
+        for (let i = 0; i < pageData.totalPages; i++) {
+            const active = (i === pageData.number) ? 'active' : '';
+            html += `<li class="page-item ${active}"><a class="page-link" onclick="${fetchFunctionName}(${i})">${i + 1}</a></li>`;
+        }
+
+        const nextDisabled = pageData.last ? 'disabled' : '';
+        html += `<li class="page-item ${nextDisabled}"><a class="page-link" onclick="${fetchFunctionName}(${pageData.number + 1})">다음</a></li>`;
+        html += '</ul>';
+        container.innerHTML = html;
+    }
+
+    // ==========================================
+    // 1. 실시간 사용자 모니터링 로직
+    // ==========================================
+    function resetMonitorFilters() {
+        document.getElementById('monitorBuilding').value = '';
+        document.getElementById('monitorFloor').value = '';
+        document.getElementById('monitorType').value = '';
+        fetchActiveMonitors(0);
+    }
+
+    function fetchActiveMonitors(page = 0) {
+        const building = document.getElementById('monitorBuilding').value;
+        const floor = document.getElementById('monitorFloor').value;
+        const type = document.getElementById('monitorType').value;
+
+        let url = `/api/admin/monitoring/active-users?page=${page}`;
+        if (building) url += `&buildingName=${building}`;
+        if (floor) url += `&floor=${floor}`;
+        if (type) url += `&spaceType=${type}`;
+
+        fetch(url).then(res => res.json()).then(res => {
+                const tbody = document.getElementById('monitorTableBody');
+                tbody.innerHTML = '';
+                if (res.status === 'SUCCESS' && res.data) {
+                    const pageData = res.data;
+                    document.getElementById('monitorTotalCount').innerText = `${pageData.totalElements}명 조회됨`;
+                    if (pageData.content.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="py-5 text-muted">조건에 맞는 시스템 이용자가 없습니다.</td></tr>';
+                        document.getElementById('monitorPagination').innerHTML = '';
+                        return;
+                    }
+                    pageData.content.forEach(user => {
+                        tbody.innerHTML += `<tr><td class="fw-bold">${user.buildingName} ${user.floor}층</td><td>${getSpaceTypeName(user.spaceType)}</td><td class="fs-5 fw-bold text-primary">${user.seatNumber}</td><td><span class="fw-bold">${user.memberName}</span><br><small class="text-muted">(${user.loginId})</small></td><td>${formatDate(user.startTime)}</td><td><button class="btn btn-sm btn-danger fw-bold shadow-sm" onclick="forceStopUser(${user.historyId}, '${user.memberName}', '${user.seatNumber}')"><i class="bi bi-x-octagon-fill"></i> 강제 퇴실</button></td></tr>`;
+                    });
+                    renderPagination(pageData, 'monitorPagination', 'fetchActiveMonitors');
+                } else handleApiError('오류', res.message);
+            }).catch(() => handleApiError('통신 오류', '모니터링 데이터를 불러오지 못했습니다.'));
+    }
+
+    function forceStopUser(historyId, memberName, seatNumber) {
+        Swal.fire({ title: '강제 퇴실 처리', html: `정말 <b>${memberName}</b> 학생을 <br> <b>[${seatNumber}]</b> 좌석에서 강제 퇴실하시겠습니까?`, icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc3545', confirmButtonText: '네, 강제 퇴실', cancelButtonText: '취소' }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/api/admin/monitoring/${historyId}/force-stop`, { method: 'POST' }).then(res => res.json()).then(data => {
+                    if (data.status === 'SUCCESS') { Swal.fire({ icon: 'success', title: '처리 완료', text: data.message, timer: 1500, showConfirmButton: false }).then(() => { fetchActiveMonitors(0); }); }
+                    else handleApiError('처리 실패', data.message);
+                });
+            }
+        });
+    }
+
+    // ==========================================
+    // 2. 통합 시설 및 좌석 관리
+    // ==========================================
+    function fetchSeatsForAdmin(viewMode = currentAdminViewMode) {
+        currentAdminViewMode = viewMode;
+        const building = document.getElementById('searchBuilding').value; const floor = document.getElementById('searchFloor').value; const spaceType = document.getElementById('searchType').value;
+        if (!building || !floor || !spaceType) { Swal.fire({ icon: 'info', title: '검색 안내', text: '[건물명], [층수], [장소 유형] 3가지를 모두 선택해야 조회 및 도면 확인이 가능합니다.' }); return; }
+        fetch(`/api/admin/seats?buildingName=${building}&floor=${floor}&spaceType=${spaceType}`).then(res => res.json()).then(data => { if (data.status === 'SUCCESS') { fetchedSeatsData = data.data; if(viewMode === 'TABLE') renderAdminTable(fetchedSeatsData); else if(viewMode === 'GRID') renderAdminGrid(fetchedSeatsData); } });
+    }
+
+    function renderAdminTable(seats) {
+        document.getElementById('adminTableView').style.display = 'block'; document.getElementById('adminGridView').style.display = 'none';
+        const tbody = document.getElementById('adminSeatTableBody'); tbody.innerHTML = '';
+        if(seats.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="py-5 text-muted">조건에 맞는 좌석이 존재하지 않습니다.</td></tr>'; return; }
+        seats.forEach(seat => {
+            let statusBadge = (seat.status === 'AVAILABLE') ? '<span class="badge bg-primary">이용 가능</span>' : (seat.status === 'IN_USE') ? '<span class="badge bg-secondary">사용 중</span>' : '<span class="badge bg-danger">점검 중</span>';
+            let actionButtons = '';
+            if(seat.status === 'AVAILABLE') actionButtons = `<button class="btn btn-sm btn-warning me-1" onclick="changeMaintenance(${seat.seatId}, true)">점검 전환</button>`; else if(seat.status === 'MAINTENANCE') actionButtons = `<button class="btn btn-sm btn-success me-1" onclick="changeMaintenance(${seat.seatId}, false)">정상 복구</button>`;
+            actionButtons += `<button class="btn btn-sm btn-info text-white me-1" onclick='openEditModal(${JSON.stringify(seat)})'>수정</button>`; actionButtons += `<button class="btn btn-sm btn-outline-danger" onclick="deleteSeat(${seat.seatId})"><i class="bi bi-trash"></i></button>`;
+            tbody.innerHTML += `<tr><td class="fw-bold">${seat.buildingName} ${seat.floor}층</td><td>${getSpaceTypeName(seat.spaceType)}</td><td class="text-primary fw-bold fs-5">${seat.seatNumber}</td><td>(행: ${seat.rowIndex}, 열: ${seat.colIndex})</td><td>${statusBadge}</td><td>${actionButtons}</td></tr>`;
+        });
+    }
+
+    function renderAdminGrid(seats) {
+        document.getElementById('adminTableView').style.display = 'none'; document.getElementById('adminGridView').style.display = 'block';
+        const grid = document.getElementById('adminSeatGrid'); grid.innerHTML = '';
+        if(seats.length === 0) { grid.innerHTML = '<div class="py-5 text-muted fw-bold">조건에 맞는 좌석이 존재하지 않아 도면을 그릴 수 없습니다.</div>'; grid.style.display = 'block'; return; }
+        grid.style.display = 'grid'; const maxRow = Math.max(...seats.map(s => s.rowIndex || 1)); const maxCol = Math.max(...seats.map(s => s.colIndex || 1));
+        grid.style.gridTemplateColumns = `repeat(${maxCol}, 65px)`; grid.style.gridTemplateRows = `repeat(${maxRow}, 65px)`;
+        seats.forEach(seat => {
+            const seatDiv = document.createElement('div'); seatDiv.className = `admin-seat-item status-${seat.status}`; seatDiv.innerText = seat.seatNumber; seatDiv.style.gridRow = seat.rowIndex; seatDiv.style.gridColumn = seat.colIndex; seatDiv.onclick = () => handleAdminSeatClick(seat); grid.appendChild(seatDiv);
+        });
+    }
+
+    function handleAdminSeatClick(seat) {
+        const statusText = seat.status === 'AVAILABLE' ? '이용 가능' : (seat.status === 'IN_USE' ? '사용 중' : '점검 중');
+        const maintenanceBtnText = seat.status === 'MAINTENANCE' ? '정상 복구' : '점검 전환'; const isMaintenance = seat.status !== 'MAINTENANCE';
+        Swal.fire({ title: `[${seat.seatNumber}] 좌석 관리`, html: `현재 위치: ${seat.buildingName} ${seat.floor}층<br>현재 상태: <b class="text-primary">${statusText}</b>`, showDenyButton: true, showCancelButton: true, confirmButtonText: '<i class="bi bi-pencil-square"></i> 좌석 수정', confirmButtonColor: '#0dcaf0', denyButtonText: `<i class="bi bi-tools"></i> ${maintenanceBtnText}`, denyButtonColor: '#ffc107', cancelButtonText: '닫기' }).then((result) => {
+            if (result.isConfirmed) { openEditModal(seat); } else if (result.isDenied) { if(seat.status === 'IN_USE') { Swal.fire('알림', '사용 중인 좌석은 점검 상태로 바꿀 수 없습니다.', 'warning'); } else { changeMaintenance(seat.seatId, isMaintenance); } }
+        });
+    }
+
+    function registerSingleSeat() {
+        const reqData = { buildingName: document.getElementById('regCommonBuilding').value, floor: parseInt(document.getElementById('regCommonFloor').value), spaceType: document.getElementById('regCommonSpaceType').value, seatNumber: document.getElementById('regSingleSeatNum').value, rowIndex: parseInt(document.getElementById('regSingleRow').value), colIndex: parseInt(document.getElementById('regSingleCol').value) };
+        if(!reqData.seatNumber || !reqData.rowIndex || !reqData.colIndex) { Swal.fire('알림', '번호와 좌표를 입력해주세요.', 'warning'); return; }
+        fetch('/api/seats/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(reqData) }).then(res => res.json()).then(res => {
+            if (res.status === 'SUCCESS') { Swal.fire('등록 완료', '신규 좌석이 시스템에 등록되었습니다.', 'success').then(() => { bootstrap.Modal.getInstance(document.getElementById('seatRegisterModal')).hide(); document.getElementById('searchBuilding').value = reqData.buildingName; document.getElementById('searchFloor').value = reqData.floor; document.getElementById('searchType').value = reqData.spaceType; document.getElementById('regSingleSeatNum').value = ''; fetchSeatsForAdmin(); }); } else handleApiError('오류', res.message);
+        });
+    }
+
+    function openEditModal(seat) { document.getElementById('editSeatId').value = seat.seatId; document.getElementById('editBuilding').value = seat.buildingName; document.getElementById('editFloor').value = seat.floor; document.getElementById('editSpaceType').value = seat.spaceType; document.getElementById('editSeatNumber').value = seat.seatNumber; document.getElementById('editRow').value = seat.rowIndex; document.getElementById('editCol').value = seat.colIndex; new bootstrap.Modal(document.getElementById('seatEditModal')).show(); }
+
+    function updateSeat() {
+        const id = document.getElementById('editSeatId').value; const data = { buildingName: document.getElementById('editBuilding').value, floor: parseInt(document.getElementById('editFloor').value), spaceType: document.getElementById('editSpaceType').value, seatNumber: document.getElementById('editSeatNumber').value, rowIndex: parseInt(document.getElementById('editRow').value), colIndex: parseInt(document.getElementById('editCol').value) };
+        fetch(`/api/seats/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(res => res.json()).then(res => {
+            if(res.status === 'SUCCESS') { Swal.fire('수정 완료', '좌석 정보가 변경되었습니다.', 'success').then(() => { bootstrap.Modal.getInstance(document.getElementById('seatEditModal')).hide(); document.getElementById('searchBuilding').value = data.buildingName; document.getElementById('searchFloor').value = data.floor; document.getElementById('searchType').value = data.spaceType; fetchSeatsForAdmin(); }); } else handleApiError('오류', res.message);
+        });
+    }
+
+    function changeMaintenance(seatId, isToMaintenance) { const url = isToMaintenance ? `/api/seats/${seatId}/maintenance` : `/api/seats/${seatId}/resolve`; fetch(url, { method: 'PUT' }).then(() => fetchSeatsForAdmin()); }
+    function deleteSeat(seatId) { Swal.fire({ title: '정말 삭제하시겠습니까?', text: "이 작업은 되돌릴 수 없습니다.", icon: 'error', showCancelButton: true, confirmButtonColor: '#dc3545', confirmButtonText: '삭제', cancelButtonText: '취소' }).then((result) => { if(result.isConfirmed) fetch(`/api/seats/${seatId}`, { method: 'DELETE' }).then(() => fetchSeatsForAdmin()); }); }
+
+    let gridState = []; let maxRows = 0; let maxCols = 0;
+    function toggleBulkPrefix() { const rule = document.getElementById('bulkNamingRule').value; const prefixDiv = document.getElementById('bulkPrefixWrapper'); if(rule === 'PREFIX') prefixDiv.style.display = 'block'; else prefixDiv.style.display = 'none'; updateGridLabels(); }
+    function generateGridPreview() {
+        maxRows = parseInt(document.getElementById('bulkRows').value); maxCols = parseInt(document.getElementById('bulkCols').value);
+        if(!maxRows || !maxCols || maxRows < 1 || maxCols < 1) { Swal.fire('알림', '행과 열의 개수를 1 이상 입력해주세요.', 'warning'); return; }
+        if(maxRows > 26) { Swal.fire('알림', '알파벳 매핑을 위해 행은 최대 26행까지만 지원합니다.', 'warning'); return; }
+        gridState = []; for(let r=0; r<maxRows; r++) { let rowArr = []; for(let c=0; c<maxCols; c++) { rowArr.push(true); } gridState.push(rowArr); }
+        const container = document.getElementById('gridPreviewContainer'); container.style.display = 'grid'; container.style.gridTemplateColumns = `repeat(${maxCols}, max-content)`; container.style.gap = '8px'; container.style.justifyContent = 'center'; container.innerHTML = '';
+        for(let r=0; r<maxRows; r++) { for(let c=0; c<maxCols; c++) { const box = document.createElement('div'); box.id = `seat-box-${r}-${c}`; box.className = 'seat-box seat-active'; box.onclick = () => toggleSeatState(r, c); container.appendChild(box); } }
+        updateGridLabels();
+    }
+    function toggleSeatState(r, c) { gridState[r][c] = !gridState[r][c]; const box = document.getElementById(`seat-box-${r}-${c}`); box.className = gridState[r][c] ? 'seat-box seat-active' : 'seat-box seat-disabled'; updateGridLabels(); }
+    function updateGridLabels() {
+        if(gridState.length === 0) return; const rule = document.getElementById('bulkNamingRule').value; const prefix = document.getElementById('bulkPrefix').value || ''; let globalCounter = 1;
+        for(let r=0; r<maxRows; r++) { let rowCounter = 1; let rowLetter = String.fromCharCode(65 + r);
+            for(let c=0; c<maxCols; c++) { const box = document.getElementById(`seat-box-${r}-${c}`);
+                if(gridState[r][c]) { let label = ''; if(rule === 'ALPHA') { label = `${rowLetter}-${rowCounter}`; rowCounter++; } else { label = `${prefix}${globalCounter}`; globalCounter++; } box.innerText = label; box.dataset.label = label; }
+                else { box.innerText = 'X'; box.dataset.label = ''; }
+            }
+        }
+    }
+    function submitBulkSeats() {
+        if(gridState.length === 0) { Swal.fire('알림', '먼저 [미리보기] 버튼을 눌러 바둑판을 생성해주세요.', 'warning'); return; }
+        const bldg = document.getElementById('regCommonBuilding').value; const flr = parseInt(document.getElementById('regCommonFloor').value); const stype = document.getElementById('regCommonSpaceType').value; const payload = [];
+        for(let r=0; r<maxRows; r++) { for(let c=0; c<maxCols; c++) { if(gridState[r][c]) { const box = document.getElementById(`seat-box-${r}-${c}`); payload.push({ buildingName: bldg, floor: flr, spaceType: stype, seatNumber: box.dataset.label, rowIndex: r + 1, colIndex: c + 1 }); } } }
+        if(payload.length === 0) { Swal.fire('알림', '생성할 좌석이 없습니다.', 'warning'); return; }
+        fetch('/api/seats/bulk', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(res => res.json()).then(res => {
+            if(res.status === 'SUCCESS') { Swal.fire('일괄 등록 완료', res.message, 'success').then(() => { bootstrap.Modal.getInstance(document.getElementById('seatRegisterModal')).hide(); document.getElementById('searchBuilding').value = bldg; document.getElementById('searchFloor').value = flr; document.getElementById('searchType').value = stype; gridState = []; document.getElementById('gridPreviewContainer').style.display = 'none'; document.getElementById('gridPreviewContainer').innerHTML = ''; fetchSeatsForAdmin(); }); } else handleApiError('일괄 등록 실패', res.message);
+        });
+    }
+
+    // ==========================================
+    // 💡 3. [업데이트됨] 고장 신고 내역 처리 및 UI 테마 통일
+    // ==========================================
+    function updateFilterButtons(activeStatus) {
+        // 모든 버튼을 비활성화(outline) 상태로 초기화
+        document.getElementById('filter-ALL').className = 'btn btn-outline-primary fw-bold filter-btn';
+        document.getElementById('filter-RECEIVED').className = 'btn btn-outline-danger fw-bold filter-btn';
+        document.getElementById('filter-IN_PROGRESS').className = 'btn btn-outline-warning fw-bold text-dark filter-btn';
+        document.getElementById('filter-RESOLVED').className = 'btn btn-outline-success fw-bold filter-btn';
+
+        // 현재 클릭된 상태의 버튼만 꽉 찬 색상(solid)으로 변경
+        if (!activeStatus || activeStatus === 'ALL' || activeStatus === '') {
+            document.getElementById('filter-ALL').className = 'btn btn-primary fw-bold filter-btn';
+        } else if (activeStatus === 'RECEIVED') {
+            document.getElementById('filter-RECEIVED').className = 'btn btn-danger fw-bold filter-btn';
+        } else if (activeStatus === 'IN_PROGRESS') {
+            document.getElementById('filter-IN_PROGRESS').className = 'btn btn-warning fw-bold text-dark filter-btn';
+        } else if (activeStatus === 'RESOLVED') {
+            document.getElementById('filter-RESOLVED').className = 'btn btn-success fw-bold filter-btn';
+        }
+    }
+
+    function fetchAdminReports(page = 0, status = currentReportStatus) {
+        currentReportStatus = status;
+
+        // 1. 필터 버튼 색상 즉시 변경
+        updateFilterButtons(status);
+
+        const url = status && status !== 'ALL' ? `/api/admin/reports?page=${page}&status=${status}` : `/api/admin/reports?page=${page}`;
+        fetch(url)
+            .then(res => res.json())
+            .then(res => {
+                const tbody = document.getElementById('adminReportTableBody');
+                tbody.innerHTML = '';
+
+                if (res.data.content.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="py-5 text-muted fw-bold">해당 상태의 신고 내역이 없습니다.</td></tr>';
+                    document.getElementById('adminReportPagination').innerHTML = '';
+                    return;
+                }
+
+                res.data.content.forEach(r => {
+                    let badgeHtml = '';
+                    let actionHtml = '';
+
+                    // 2. 백엔드 응답값에 맞춰 뱃지 색상 및 다음 액션 버튼 렌더링
+                    // (응답값이 Enum name이든 한글 Description이든 모두 대응 가능하도록 작성)
+                    if (r.status === '접수 대기' || r.status === 'RECEIVED') {
+                        badgeHtml = '<span class="badge bg-danger">접수 대기</span>';
+                        actionHtml = `<button class="btn btn-sm btn-warning fw-bold text-dark" onclick="processReport(${r.id || r.reportId}, 'start')">수리 시작</button>`;
+
+                    } else if (r.status === '점검 중' || r.status === 'IN_PROGRESS') {
+                        badgeHtml = '<span class="badge bg-warning text-dark">점검 중</span>';
+                        actionHtml = `<button class="btn btn-sm btn-success fw-bold" onclick="processReport(${r.id || r.reportId}, 'resolve')">처리 완료</button>`;
+
+                    } else {
+                        badgeHtml = '<span class="badge bg-success">처리 완료</span>';
+                        actionHtml = `<button class="btn btn-sm btn-secondary fw-bold" disabled>수리 완료됨</button>`;
+                    }
+
+                    // 3. 백엔드 DTO(AdminReportDto) 구조에 맞춰 안전하게 맵핑 (r.memberName 또는 r.reporterName)
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${formatDate(r.createdAt)}</td>
+                            <td class="fw-bold">${r.memberName || r.reporterName || '이름 없음'}</td>
+                            <td>
+                                <span class="fw-bold">${r.buildingName} ${r.floor}층</span><br>
+                                <small class="text-muted">${r.seatNumber} (${getSpaceTypeName(r.spaceType)})</small>
+                            </td>
+                            <td class="text-start text-danger fw-semibold">${r.content}</td>
+                            <td>${badgeHtml}</td>
+                            <td>${actionHtml}</td>
+                        </tr>
+                    `;
+                });
+
+                renderPagination(res.data, 'adminReportPagination', 'fetchAdminReports');
+            });
+    }
+
+    function processReport(reportId, action) {
+        fetch(`/api/admin/reports/${reportId}/${action}`, { method: 'PATCH' })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'SUCCESS') {
+                    Swal.fire({
+                        icon: 'success', title: '상태 변경 완료', text: data.message, timer: 1500, showConfirmButton: false
+                    }).then(() => fetchAdminReports(0, currentReportStatus)); // 변경 후 현재 탭 유지하며 새로고침
+                } else {
+                    handleApiError('오류', data.message);
+                }
+            });
+    }
+</script>
+</body>
+</html>

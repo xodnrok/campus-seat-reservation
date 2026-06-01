@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    # 메모리 상에서만 잠깐 켜졌다 꺼지는 H2 DB 주소 (MySQL 모드 활성화)
+    url: jdbc:h2:mem:testdb;MODE=MySQL;NON_KEYWORDS=USER
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      # 테스트를 시작할 때 테이블을 새로 만들고, 테스트가 끝나면 깨끗하게 지웁니다.
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        # 쿼리를 보기 좋게 정렬해서 출력
+        format_sql: true
