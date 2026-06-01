@@ -37,6 +37,7 @@ public class ReportApiController {
     /**
      * FR#14. 시설 고장 및 불편 신고 접수
      */
+    //수정할것 주석
     @PostMapping("/api/reports")
     public MemberApiResponse<Long> createReport(
             @RequestBody @Valid ReportRequest request,
