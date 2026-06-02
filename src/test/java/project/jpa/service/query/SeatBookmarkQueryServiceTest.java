@@ -63,7 +63,7 @@ class SeatBookmarkQueryServiceTest {
         // [2. Given] 타인 계정으로 좌석 3을 즐겨찾기 등록 (내 목록에 나오면 안 됨)
         seatBookmarkService.toggleBookmark(other.getId(), seat3.getId());
 
-        // 💡 페이징 요청 객체 생성 (0페이지, 10개씩)
+        //  페이징 요청 객체 생성 (0페이지, 10개씩)
         PageRequest pageRequest = PageRequest.of(0, 10);
 
         // [3. When] 내 즐겨찾기 목록 조회 실행 (쿼리 서비스 호출 -> Page<BookmarkDto> 반환)
@@ -75,10 +75,10 @@ class SeatBookmarkQueryServiceTest {
 
         // 2. 격리 검증: 타인의 즐겨찾기(S-12)는 포함되지 않아야 함
         boolean hasOtherBookmark = myBookmarks.getContent().stream()
-                .anyMatch(b -> b.getSeatNumber().equals("S-12")); // 💡 DTO이므로 바로 getSeatNumber() 호출
+                .anyMatch(b -> b.getSeatNumber().equals("S-12")); //  DTO이므로 바로 getSeatNumber() 호출
         Assertions.assertThat(hasOtherBookmark).isFalse();
 
-        // 3. 정렬 검증: 💡 [핵심] 최신순(createdAt DESC)이므로 나중에 등록한 S-11이 맨 위(index 0)에 와야 함
+        // 3. 정렬 검증:   최신순(createdAt DESC)이므로 나중에 등록한 S-11이 맨 위(index 0)에 와야 함
         Assertions.assertThat(myBookmarks.getContent().get(0).getSeatNumber()).isEqualTo("S-11");
         Assertions.assertThat(myBookmarks.getContent().get(1).getSeatNumber()).isEqualTo("S-10");
 
@@ -95,7 +95,7 @@ class SeatBookmarkQueryServiceTest {
         Member newMember = Member.createMember("newbie", "1234", "신입생", MemberRole.USER);
         memberRepository.save(newMember);
 
-        // 💡 페이징 요청 객체 생성 (0페이지, 10개씩)
+        //  페이징 요청 객체 생성 (0페이지, 10개씩)
         PageRequest pageRequest = PageRequest.of(0, 10);
 
         // [2. When] 목록 조회 (쿼리 서비스 호출)

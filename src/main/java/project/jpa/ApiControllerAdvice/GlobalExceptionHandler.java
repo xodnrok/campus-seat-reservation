@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 💡 DTO 검증(@Valid) 실패 시 발생하는 필드 에러 전담 핸들러
+     * DTO 검증(@Valid) 실패 시 발생하는 필드 에러 전담 핸들러
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public MemberApiResponse<Object> handleValidationExceptions(MethodArgumentNotValidException e) {
@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
         // 1. 발생한 모든 필드 에러를 예쁘게 담을 Map(바구니) 준비
         Map<String, String> fieldErrors = new HashMap<>();
 
-        // 2. 에러가 난 필드 이름(key)과 우리가 DTO에 적은 메시지(value)를 바구니에 쏙쏙 담기
+        // 2. 에러가 난 필드 이름(key)과 DTO에 적은 메시지(value)를 바구니에 쏙쏙 담기
         for (FieldError error : e.getBindingResult().getFieldErrors()) {
             fieldErrors.put(error.getField(), error.getDefaultMessage());
         }

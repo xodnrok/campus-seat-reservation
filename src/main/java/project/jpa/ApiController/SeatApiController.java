@@ -1,5 +1,7 @@
 package project.jpa.ApiController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +21,7 @@ import project.jpa.service.query.SeatQueryService;
 
 import java.util.List;
 
+@Tag(name = "좌석 관리 API", description = "좌석 검색 , 좌석 예약 , 좌석 반납 , 좌석 등록 수정 삭제 , 좌석 신고 처리")
 @RestController
 @RequiredArgsConstructor
 public class SeatApiController {
@@ -31,8 +34,9 @@ public class SeatApiController {
     // ========================================== //
 
     /**
-     * FR#6. [사용자용] 실시간 좌석 동적 검색(건물이름, 층수 , 장소유형 , 좌석의 상태)
+     * FR#6. [사용자용] 통합공간 및 실시간 좌석 검색(건물이름, 층수 , 장소유형 , 좌석의 상태)
      */
+    @Operation(summary = "회원이 통합공간 및 좌석을 검색할 수 있습니다.", description = "건물이름 , 층수 , 장소유형 , 좌석의 상태를 받아서 검색합니다.")
     @GetMapping("/api/seats")
     public MemberApiResponse<List<SeatDto>> searchSeats(@ModelAttribute SeatSearchCondition condition) {
 
@@ -43,12 +47,13 @@ public class SeatApiController {
     }
 
     /**
-     * [관리자용] 실시간 좌석 동적 검색 (전체 검색 차단) 프론트에서 한번 방어 , 백엔드에서 한번 방어
+     * FR#6. [관리자용] 실시간 좌석 동적 검색 (전체 검색 차단)
      */
+    @Operation(summary = "관리자 페이지에서 통합공간 및 좌석을 검색할 수 있습니다.", description = "건물이름 , 층수 , 장소유형 , 좌석의 상태를 받아서 검색합니다.")
     @GetMapping("/api/admin/seats")
     public MemberApiResponse<List<SeatDto>> searchAdminSeats(@ModelAttribute SeatSearchCondition condition) {
 
-        // 💡 관리자는 화면에 리스트로 렌더링되므로, 서버 과부하를 막기 위해 필수 조건을 강제합니다!
+        //  관리자는 화면에 리스트로 렌더링되므로, 서버 과부하를 막기 위해 필수 조건을 강제합니다
         if (condition.getBuildingName() == null || condition.getBuildingName().isEmpty()
                 || condition.getFloor() == null) {
             throw new IllegalArgumentException("관리자 조회 시 건물명과 층수는 필수입니다.");
@@ -65,8 +70,9 @@ public class SeatApiController {
     // ========================================== //
 
     /**
-     * FR#7 ,  FR#15 . 좌석 사용 시작(단건의 경우 , 스터디 라운지) , 좌석 선택 기능
+     * FR#7. 좌석 예약(단건의 경우) , 좌석 선택 기능
      */
+    @Operation(summary = "좌석을 예약 합니다.", description = "URL로 예약하고자 하는 좌석의 ID를 가져옵니다.")
     @PostMapping("/api/seats/{seatId}/start")
     public MemberApiResponse<Long> startSeat(@PathVariable Long seatId,
                                              @SessionAttribute(name = MemberApiController.LOGIN_MEMBER) SessionMember loginMember) {
@@ -80,8 +86,9 @@ public class SeatApiController {
     }
 
     /**
-     * FR#7 ,  FR#15. 좌석 사용 시작 (여러 좌석을 한 번에 예약 , 휴게실 , 취식공간) , 좌석 선택 기능
+     * FR#7. (여러 좌석을 한 번에 예약) , 좌석 선택 기능 추후 그룹스터디방이 생긴다면 사용
      */
+    @Operation(summary = "여러 좌석을 예약 합니다.", description = "URL로 예약하고자 하는 좌석의 ID를 가져옵니다.")
     @PostMapping("/api/seats/start-multiple")
     public MemberApiResponse<String> startMultipleSeats(@RequestBody @Valid MultipleSeatRequest dto,
                                                         @SessionAttribute(name = MemberApiController.LOGIN_MEMBER) SessionMember loginMember) {
@@ -93,8 +100,9 @@ public class SeatApiController {
     }
 
     /**
-     * FR#8. 좌석 사용 종료(단건 반납 , 스터디 라운지)
+     * FR#8. 좌석 반납(단건 반납)
      */
+    @Operation(summary = "좌석을 반납합니다.", description = "URL로 반납하고자 하는 좌석의 ID를 가져옵니다.")
     @PostMapping("/api/seats/{seatId}/stop")
     public MemberApiResponse<String> stopSeat(@PathVariable Long seatId,
                                               @SessionAttribute(name = MemberApiController.LOGIN_MEMBER) SessionMember loginMember) {
@@ -106,8 +114,9 @@ public class SeatApiController {
     }
 
     /**
-     * FR#8. 좌석 사용 종료(여러 좌석을 한번에 반납 , 휴게실 , 취식공간)
+     * FR#8. 좌석 반납(여러 좌석을 한번에 반납)
      */
+    @Operation(summary = "여러 좌석을 반납합니다.", description = "URL로 반납하고자 하는 좌석의 ID를 가져옵니다.")
     @PostMapping("/api/seats/stop-multiple")
     public MemberApiResponse<String> stopMultipleSeats(@RequestBody @Valid MultipleSeatRequest dto,
                                                        @SessionAttribute(name = MemberApiController.LOGIN_MEMBER) SessionMember loginMember) {
@@ -123,8 +132,9 @@ public class SeatApiController {
     // ========================================== //
 
     /**
-     * FR#9. 시설 상태 제어 기능(점검 중 , 점검으로 인해 좌석 사용 불가)
+     * FR#9. 고장 신고 처리,시설 상태 제어 기능(점검 중 , 점검으로 인해 좌석 사용 불가)
      */
+    @Operation(summary = "관리자가 신고가 들어온 좌석의 상태를 점검중으로 변경합니다.", description = "URL로 점검하고자 하는 좌석의 ID를 가져옵니다.")
     @PutMapping("/api/seats/{seatId}/maintenance")
     @AdminOnly
     public MemberApiResponse<String> changeToMaintenance(@PathVariable Long seatId) {
@@ -136,8 +146,9 @@ public class SeatApiController {
     }
 
     /**
-     * FR#9. 시설 상태 제어 기능(점검 완료 , 다시 이용 가능)
+     * FR#9. 고장 신고 처리,시설 상태 제어 기능(점검 완료 , 다시 이용 가능)
      */
+    @Operation(summary = "관리자가 신고가 들어온 좌석의 상태를 점검 완료로 변경합니다.", description = "URL로 점검완료로 바꾸고자 하는 좌석의 ID를 가져옵니다.")
     @PutMapping("/api/seats/{seatId}/resolve")
     @AdminOnly
     public MemberApiResponse<String> resolveMaintenance(@PathVariable Long seatId) {
@@ -151,6 +162,7 @@ public class SeatApiController {
     /**
      * FR#11.  좌석 및 시설 기초 정보 등록
      */
+    @Operation(summary = "관리자가 새로운 좌석을 등록합니다.", description = "건물이름, 층수 , 공간유형 , 좌석번호 , 행 , 열 값을 받아서 좌석을 만듭니다.")
     @PostMapping("/api/seats/register")
     @AdminOnly
     public MemberApiResponse<Long> registerSeat(@RequestBody @Valid SeatRegisterRequest dto) {
@@ -165,8 +177,9 @@ public class SeatApiController {
     }
 
     /**
-     * FR#11, #12. 좌석 기초 정보 및 레이아웃 수정 관리자가 실수로 등록한 정보나 좌석의 위치(행/열)를 수정할 때 사용
+     * FR#20. 등록한 좌석을 수정 , 좌석 기초 정보 및 레이아웃 수정 관리자가 실수로 등록한 정보나 좌석의 위치(행/열)를 수정할 때 사용
      */
+    @Operation(summary = "관리자가 등록한 좌석을 수정 합니다.", description = "좌석 ID , 건물이름, 층수 , 공간유형 , 좌석번호 , 행 , 열 값을 받아서 좌석을 만듭니다.")
     @PutMapping("/api/seats/{seatId}")
     @AdminOnly
     public MemberApiResponse<String> updateSeat(@PathVariable Long seatId, @RequestBody @Valid SeatRegisterRequest dto) {
@@ -181,8 +194,9 @@ public class SeatApiController {
     }
 
     /**
-     * FR#11, #12. 좌석 삭제 기능 (소프트 삭제)
+     * FR#21. 등록한 좌석 삭제 기능 (소프트 삭제)
      */
+    @Operation(summary = "관리자가 등록한 좌석을 삭제합니다.(소프트삭제)", description = "삭제할 좌석 ID를 URL로 받아옵니다.")
     @DeleteMapping("/api/seats/{seatId}")
     @AdminOnly
     public MemberApiResponse<String> deleteSeat(@PathVariable Long seatId) {
@@ -197,6 +211,7 @@ public class SeatApiController {
      * FR#11 [관리자] 다건 좌석 그리드 일괄 등록 API
      * 프론트엔드에서 계산된 좌석 배열(List)을 받아 한 번에 저장
      */
+    @Operation(summary = "관리자가 여러개의 좌석을 한번에 등록합니다.", description = "건물이름, 층수 , 공간유형 , 좌석번호 , 행 , 열 값을 받아서 좌석을 만듭니다.")
     @PostMapping("/api/seats/bulk")
     @AdminOnly
     public MemberApiResponse<String> registerSeatsBulk(@RequestBody @Valid List<SeatRegisterRequest> requests) {
@@ -210,8 +225,10 @@ public class SeatApiController {
     }
 
     /**
-     * [관리자] 실시간 이용자 모니터링 목록 조회 (페이징) API
+     * FR#17. [관리자] 실시간 이용자 모니터링 목록 조회 (페이징) API
      */
+    @Operation(summary = "관리자가 해당공간에서 좌석을 사용중인 사용자를 확인가능합니다.",
+            description = "건물이름, 층수 , 공간유형 , 좌석상태를 입력해서 검색합니다.")
     @GetMapping("/api/admin/monitoring/active-users")
     @AdminOnly
     public MemberApiResponse<Page<ActiveUserDto>> getActiveUsers(
@@ -223,8 +240,9 @@ public class SeatApiController {
     }
 
     /**
-     * [관리자] 강제 퇴실(반납) 처리 API
+     * FR#17. [관리자] 강제 퇴실(반납) 처리 API
      */
+    @Operation(summary = "관리자가 회원의 사용중인 좌석을 강제 종료 시킵니다.", description = "이용기록 ID를 가져와서 처리합니다.")
     @PostMapping("/api/admin/monitoring/{historyId}/force-stop")
     @AdminOnly
     public MemberApiResponse<String> forceStopUsage(@PathVariable Long historyId) {

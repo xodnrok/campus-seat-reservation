@@ -46,8 +46,7 @@ public class SeatService {
 
 
     /**
-     * FR#11, #12. 좌석 기초 정보 및 레이아웃 수정
-     * 관리자가 실수로 등록한 정보나 좌석의 위치(행/열)를 수정할 때 사용
+     * FR#20. 등록한 좌석을 수정 , 좌석 기초 정보 및 레이아웃 수정 관리자가 실수로 등록한 정보나 좌석의 위치(행/열)를 수정할 때 사용
      */
     public void updateSeatInfo(Long seatId, String buildingName, Integer floor,SpaceType spaceType,
                                String seatNumber, Integer rowIndex, Integer colIndex) {
@@ -60,7 +59,7 @@ public class SeatService {
     }
 
     /**
-     * FR#9. 시설 상태 제어 기능(점검 중 , 점검으로 인해 좌석 사용 불가)
+     * FR#9. 고장 신고 처리,시설 상태 제어 기능(점검 중 , 점검으로 인해 좌석 사용 불가)
      */
     public void changeSeatToMaintenance(Long seatId) {
         Seat seat = seatRepository.findById(seatId)
@@ -71,7 +70,7 @@ public class SeatService {
     }
 
     /**
-     * FR#9. 시설 상태 제어 기능(점검 완료 , 다시 이용 가능)
+     * FR#9. 고장 신고 처리,시설 상태 제어 기능(점검 완료 , 다시 이용 가능)
      */
     public void resolveSeatMaintenance(Long seatId) {
 
@@ -84,7 +83,7 @@ public class SeatService {
     }
 
     /**
-     * FR#7 ,  FR#15 . 좌석 사용 시작(단건의 경우 , 스터디 라운지) , 좌석 선택 기능
+     * FR#7. 좌석 예약(단건의 경우) , 좌석 선택 기능
      */
     public Long startUsingSeat(Long memberId, Long seatId) {
 
@@ -118,11 +117,11 @@ public class SeatService {
     }
 
     /**
-     * FR#7 ,  FR#15. 좌석 사용 시작 (여러 좌석을 한 번에 예약 , 휴게실 , 취식공간) , 좌석 선택 기능
+     * FR#7. (여러 좌석을 한 번에 예약) , 좌석 선택 기능 추후 그룹스터디방이 생긴다면 사용
      */
     public void startUsingMultipleSeats(Long memberId, List<Long> seatIds) {
 
-        // 1.예약하려는 주체(Member)를 DB에서 꺼내옵니다. (for문 밖에서 1번만)
+        // 1.예약하려는 주체(Member)를 DB에서 꺼내옵니다.
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
@@ -147,12 +146,12 @@ public class SeatService {
             Seat seat = seatRepository.findById(seatId)
                     .orElseThrow(() -> new IllegalStateException("없는 좌석입니다."));
 
-            //  5-1. 스터디 라운지는 다건 예약 불가 (도중에 스터디 라운지 섞이는거 방지)
+            //  5-1. 스터디 라운지는 다건 예약 불가
             if (seat.getSpaceType() == SpaceType.STUDY_LOUNGE) {
                 throw new IllegalStateException("다건 예약에는 스터디 라운지를 포함할 수 없습니다.");
             }
 
-            //  5-2.  선택한 좌석들의 장소 유형이 모두 같은지 검증!
+            //  5-2.  선택한 좌석들의 장소 유형이 모두 같은지 검증
             if (firstSpaceType == null) {
                 firstSpaceType = seat.getSpaceType(); // 첫 좌석의 유형을 저장
             } else if (firstSpaceType != seat.getSpaceType()) {
@@ -167,7 +166,7 @@ public class SeatService {
     }
 
     /**
-     * FR#8. 좌석 사용 종료(단건 반납 , 스터디 라운지)
+     * FR#8. 좌석 반납(단건 반납)
      */
     public void stopUsingSeat(Long memberId, Long seatId) {
 
@@ -199,7 +198,7 @@ public class SeatService {
             Seat seat = seatRepository.findById(seatId)
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 좌석입니다."));
 
-            // 💡 2. [검증] 예약 API와의 일관성: 스터디 라운지는 다건 반납 API로 처리 불가!
+            // 2. [검증] 예약 API와의 일관성: 스터디 라운지는 다건 반납 API로 처리 불가
             if (seat.getSpaceType() == SpaceType.STUDY_LOUNGE) {
                 throw new IllegalStateException("스터디 라운지는 단건 반납을 이용해주세요.");
             }
@@ -215,7 +214,7 @@ public class SeatService {
     }
 
     /**
-     * 좌석 소프트 삭제 기능 (관리자 전용)
+     * FR#21. 등록한 좌석 삭제 기능 (소프트 삭제)
      * 엔티티의 @SQLDelete 설정에 의해 물리적 삭제(DELETE) 대신 상태 변경(UPDATE is_deleted = true)으로 동작합니다.
      */
     @Transactional
@@ -231,14 +230,14 @@ public class SeatService {
 
 
     /**
-     * [관리자] 좌석 다중 일괄 등록
-     * 여러 개의 좌석 정보를 한 번의 트랜잭션으로 DB에 저장합니다.
+     * FR#11 [관리자] 다건 좌석 그리드 일괄 등록 API
+     * 프론트엔드에서 계산된 좌석 배열(List)을 받아 한 번에 저장
      */
     @Transactional
     public void registerSeatsBulk(List<SeatRegisterRequest> requests) {
 
-        // 1. 저장 전 모든 좌석에 대해 검증 먼저 실행!
-        // (단 하나라도 중복이 있으면 예외가 터지면서 전체 롤백되어 안전합니다)
+        // 1. 저장 전 모든 좌석에 대해 검증 먼저 실행
+        // (단 하나라도 중복이 있으면 예외가 터지면서 전체 롤백되어 안전)
         for (SeatRegisterRequest req : requests) {
             validateDuplicateSeat(
                     req.getBuildingName(), req.getFloor(), req.getSpaceType(),
@@ -259,7 +258,7 @@ public class SeatService {
     }
 
     /**
-     * [관리자] 특정 이용자의 좌석 강제 퇴실(반납) 처리
+     * FR#17. [관리자] 강제 퇴실(반납) 처리 API
      */
     public void forceStopUsage(Long historyId) {
 

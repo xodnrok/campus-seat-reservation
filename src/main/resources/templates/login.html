@@ -54,7 +54,7 @@
             font-size: 0.85rem;
             font-weight: 500;
         }
-        /* 💡 비밀번호 눈 모양 아이콘 스타일 */
+        /*  비밀번호 눈 모양 아이콘 스타일 */
         .toggle-password {
             cursor: pointer;
             z-index: 5;
@@ -142,7 +142,7 @@
 
 <script>
     // ----------------------------------------
-    // 💡 주소창에 #join이 있으면 회원가입 탭을 자동으로 열어주는 로직
+    //  주소창에 #join이 있으면 회원가입 탭을 자동으로 열어주는 로직
     // ----------------------------------------
     document.addEventListener("DOMContentLoaded", function() {
         if (window.location.hash === '#join') {
@@ -152,7 +152,7 @@
     });
 
     // ----------------------------------------
-    // 💡 비밀번호 눈 모양 토글 (보이기/숨기기) 로직
+    //  비밀번호 눈 모양 토글 (보이기/숨기기) 로직
     // ----------------------------------------
     document.querySelectorAll('.toggle-password').forEach(function(icon) {
         icon.addEventListener('click', function() {
@@ -188,7 +188,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.status === 'SUCCESS') {
-                // 💡 투박한 alert 대신 예쁜 SweetAlert2 팝업 적용
+                //  투박한 alert 대신 예쁜 SweetAlert2 팝업 적용
                 Swal.fire({
                     icon: 'success',
                     title: '로그인 성공',

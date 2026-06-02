@@ -31,6 +31,9 @@ public class UsageHistoryRepositoryImpl implements UsageHistoryRepositoryCustom{
         this.queryFactory = new JPAQueryFactory(em);
     }
 
+    /**
+     * FR#10. 내 이용 기록 전체 조회 API (엔티티 노출 차단, 즉시 DTO 변환)
+     */
     @Override
     public Page<UsageHistory> findMyHistories(Long memberId, Pageable pageable) {
 
@@ -55,21 +58,24 @@ public class UsageHistoryRepositoryImpl implements UsageHistoryRepositoryCustom{
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
+    /**
+     * FR#17 [관리자] 실시간 이용자 모니터링 목록 조회 (페이징) API
+     */
     @Override
     public Page<ActiveUserDto> findActiveUsersMonitoring(SeatSearchCondition condition, Pageable pageable) {
 
         // 1. 실제 데이터 조회 쿼리 (동적 WHERE 절 + 페이징)
         List<ActiveUserDto> content = queryFactory
                 .select(new QActiveUserDto(
-                        usageHistory.id,
-                        seat.id,
-                        member.name,
-                        member.loginId,
-                        seat.buildingName,
-                        seat.floor,
-                        seat.spaceType,
-                        seat.seatNumber,
-                        usageHistory.startTime
+                        usageHistory.id,                //이용기록 PK
+                        seat.id,                        //좌석 PK
+                        member.name,                    //회원 이름
+                        member.loginId,                 //회원 로그인 ID
+                        seat.buildingName,              //좌석 건물이름
+                        seat.floor,                     //좌석 층
+                        seat.spaceType,                 //좌석 장소 유형
+                        seat.seatNumber,                //좌석 번호
+                        usageHistory.startTime          //이용기록 시작 시간
                 ))
                 .from(usageHistory)
                 .join(usageHistory.member, member)
@@ -101,7 +107,7 @@ public class UsageHistoryRepositoryImpl implements UsageHistoryRepositoryCustom{
     }
 
     // ==========================================
-    // 💡 QueryDSL 동적 쿼리를 위한 BooleanExpression 메서드들
+    //  QueryDSL 동적 쿼리를 위한 BooleanExpression 메서드들
     // 값이 null 이거나 비어있으면 null을 반환하여 WHERE 절에서 무시됨 (전체 검색 효과)
     // ==========================================
     private BooleanExpression buildingEq(String buildingName) {

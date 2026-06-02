@@ -23,6 +23,9 @@ public class SeatRepositoryImpl implements SeatRepositoryCustom{
         this.queryFactory = new JPAQueryFactory(em);
     }
 
+    /**
+     * FR#6. [사용자용] 통합공간 및 실시간 좌석 검색(건물이름, 층수 , 장소유형 , 좌석의 상태)
+     */
     @Override
     public List<SeatDto> search(SeatSearchCondition condition) {
 

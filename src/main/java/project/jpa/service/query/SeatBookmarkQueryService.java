@@ -25,7 +25,7 @@ public class SeatBookmarkQueryService {
         // 1. DB에서 엔티티를 Page로 가져옴
         Page<SeatBookmark> bookmarkPage = seatBookmarkRepository.findMyBookmarks(memberId, pageable);
 
-        // 2. 💡 트랜잭션이 살아있을 때 안전하게 DTO로 변환하여 반환
+        // 2. 트랜잭션이 살아있을 때 안전하게 DTO로 변환하여 반환
         return bookmarkPage.map(bookmark -> new BookmarkDto(
                 bookmark.getId(),                    // 즐겨찾기 PK
                 bookmark.getSeat().getId(),          // 좌석 PK

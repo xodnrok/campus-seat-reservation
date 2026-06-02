@@ -225,7 +225,7 @@ class ReportServiceTest {
         Report finalReport = reportRepository.findById(reportId).get();
         Assertions.assertThat(finalReport.getStatus()).isEqualTo(ReportStatus.RESOLVED);
 
-        // then 2: 💡 [핵심] 좌석 상태가 AVAILABLE(이용 가능)로 확실하게 돌아왔는지 검증
+        // then 2:  [핵심] 좌석 상태가 AVAILABLE(이용 가능)로 확실하게 돌아왔는지 검증
         Seat finalSeat = seatRepository.findById(seatId).get();
         Assertions.assertThat(finalSeat.getStatus()).isEqualTo(SeatStatus.AVAILABLE);
     }

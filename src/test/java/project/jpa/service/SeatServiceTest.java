@@ -343,7 +343,7 @@ class SeatServiceTest {
         } catch (IllegalStateException e) {
             // "한 번에 최대 4개의 좌석까지만 예약 가능합니다." 예외 메시지 검증
             Assertions.assertThat(e.getMessage()).contains("최대 4개");
-            System.out.println("✅ 5개 초과 예약 차단 성공: " + e.getMessage());
+            System.out.println(" 5개 초과 예약 차단 성공: " + e.getMessage());
         }
     }
 

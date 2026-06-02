@@ -13,7 +13,7 @@ import project.jpa.enums.SpaceType;
 import project.jpa.repository.MemberRepository;
 import project.jpa.repository.SeatRepository;
 
-@Profile("!test") // 💡 추가: test 환경이 아닐 때만 작동!
+@Profile("!test") // test 환경이 아닐 때만 작동!
 @Component
 @RequiredArgsConstructor
 public class InitDb {
@@ -43,7 +43,7 @@ public class InitDb {
             // 3. DB에 저장
             memberRepository.save(admin);
 
-            // 4. 콘솔창에 알림 띄우기 (잘 만들어졌는지 확인용)
+            // 4. 콘솔창에 알림 띄우기
             System.out.println("======================================");
             System.out.println("ID : admin / PW : 1234");
             System.out.println("======================================");
@@ -51,7 +51,7 @@ public class InitDb {
         // ==========================================
        // 2. 실시간 좌석 조회용 더미 데이터 생성
        // ==========================================
-       // 💡 좌석이 DB에 하나도 없을 때만 데이터를 쏟아붓습니다 (중복 생성 방지)
+       // 좌석이 DB에 하나도 없을 때만 데이터를 쏟아붓습니다 (중복 생성 방지)
        if (seatRepository.count() == 0) {
 
           // 1) 호천관 1층 스터디 라운지 (5행 5열 = 총 25석)

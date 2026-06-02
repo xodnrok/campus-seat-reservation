@@ -1,5 +1,7 @@
 package project.jpa.ApiController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -23,6 +25,7 @@ import project.jpa.service.query.ReportQueryService;
 
 import java.time.LocalDateTime;
 
+@Tag(name = "신고 관리 API", description = "시설 고장 신고 , 신고 내역 조회 , 신고 상태 변경 관련 API")
 @RestController
 @RequiredArgsConstructor
 public class ReportApiController {
@@ -37,7 +40,7 @@ public class ReportApiController {
     /**
      * FR#14. 시설 고장 및 불편 신고 접수
      */
-    //수정할것 주석
+    @Operation(summary = "시설 고장 및 불편 신고 접수", description = "신고할 좌석 ID , 신고할 내용을 받아 신고를 접수합니다.")
     @PostMapping("/api/reports")
     public MemberApiResponse<Long> createReport(
             @RequestBody @Valid ReportRequest request,
@@ -55,6 +58,7 @@ public class ReportApiController {
     /**
      * FR#18. 내 신고 내역 조회 (마이페이지용)
      */
+    @Operation(summary = "나의 신고 내역 조회", description = "로그인한 회원의 신고한 내역을 조회합니다.")
     @GetMapping("/api/reports/me")
     public MemberApiResponse<Page<MyReportDto>> getMyReports(
             @SessionAttribute(name = MemberApiController.LOGIN_MEMBER) SessionMember loginMember,
@@ -67,12 +71,15 @@ public class ReportApiController {
     }
 
     // ========================================== //
-    // 🛠️ [관리자용] 시설 점검 및 제어 영역
+    //  [관리자용] 시설 점검 및 제어 영역
     // ========================================== //
 
     /**
      * FR#19. 관리자 - 상태별 전체 신고 내역 조회 (접수됨, 수리중, 완료 등)
      */
+    @Operation(summary = "관리자가 회원의 신고를 상태별로 전체 조회", description = " RECEIVED(\"접수 대기\")," +
+            "    IN_PROGRESS(\"점검 중\")," +
+            "    RESOLVED(\"점검 완료\") 중 하나를 받아서 검색을 합니다.")
     @GetMapping("/api/admin/reports")
     @AdminOnly
     public MemberApiResponse<Page<AdminReportDto>> getReportsForAdmin(
@@ -88,6 +95,7 @@ public class ReportApiController {
     /**
      * FR#9. 관리자 - 수리(점검) 시작 처리
      */
+    @Operation(summary = "관리자가 신고에 대해 수리(점검) 시작 ", description = "URL로 신고한 ID를 가져와서 수리를 시작합니다.")
     @PatchMapping("/api/admin/reports/{reportId}/start")
     @AdminOnly
     public MemberApiResponse<String> startRepairing(@PathVariable Long reportId) {
@@ -100,6 +108,7 @@ public class ReportApiController {
     /**
      * FR#9. 관리자 - 신고 처리 완료 (좌석 이용 가능 원복)
      */
+    @Operation(summary = "관리자가 해당 신고를 완료함", description = "URL로 신고한 ID를 가져와서 신고 처리를 완료니다.")
     @PatchMapping("/api/admin/reports/{reportId}/resolve")
     @AdminOnly
     public MemberApiResponse<String> resolveReport(@PathVariable Long reportId) {

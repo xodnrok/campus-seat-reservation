@@ -46,15 +46,15 @@ public class UsageHistoryQueryService {
 
         return usageHistoryRepository.findMyActiveHistory(memberId)
                 .map(history -> new UsageHistoryDto(
-                        history.getId(),
-                        history.getSeat().getId(),
-                        history.getSeat().getBuildingName(),
-                        history.getSeat().getFloor(),
-                        history.getSeat().getSpaceType().getDescription(),
-                        history.getSeat().getSeatNumber(),
-                        history.getStartTime(),
-                        history.getEndTime(),
-                        history.getStatus().getDescription()
+                        history.getId(),                                    //이용기록 PK
+                        history.getSeat().getId(),                          //좌석PK
+                        history.getSeat().getBuildingName(),                //건물이름
+                        history.getSeat().getFloor(),                       //건물 층수
+                        history.getSeat().getSpaceType().getDescription(),  //장소 유형
+                        history.getSeat().getSeatNumber(),                  //좌석 번호
+                        history.getStartTime(),                             //사용 시작 시간
+                        history.getEndTime(),                               //사용 종료 시간
+                        history.getStatus().getDescription()                //좌석 사용 상태
                 ))
                 .orElse(null); // 이용 중인 좌석이 없으면 null 반환
     }

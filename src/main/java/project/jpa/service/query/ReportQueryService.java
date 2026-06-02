@@ -27,7 +27,7 @@ public class ReportQueryService {
         // 1. DB에서 엔티티를 Page로 가져옴
         Page<Report> reportPage = reportRepository.findMyReports(memberId, pageable);
 
-        // 2. 💡 트랜잭션 안에서 안전하게 DTO로 변환하여 반환
+        // 2. 트랜잭션 안에서 안전하게 DTO로 변환하여 반환
         return reportPage.map(report -> new MyReportDto(
                 report.getId(),                                         //신고 PK
                 report.getSeat().getBuildingName(),                     //신고한 건물 이름

@@ -100,7 +100,7 @@ class SeatQueryServiceTest {
         condition.setFloor(7);
         condition.setSpaceType(SpaceType.STUDY_LOUNGE);
 
-        //  조회 로직은 SeatQueryService 호출!
+        //  조회 로직은 SeatQueryService 호출
         List<SeatDto> result = seatQueryService.searchSeats(condition);
 
         // then: 정확히 1번 좌석 딱 1개만 걸러져서 나와야 함
@@ -145,7 +145,7 @@ class SeatQueryServiceTest {
         SeatSearchCondition condition = new SeatSearchCondition();
         condition.setSpaceType(SpaceType.STUDY_LOUNGE);
 
-        // 💡 조회 로직은 SeatQueryService 호출!
+        //  조회 로직은 SeatQueryService 호출!
         List<SeatDto> result = seatQueryService.searchSeats(condition);
 
         // then: 함정 데이터를 제외하고, 정확히 3개의 스터디 라운지만 검색되어야 함

@@ -8,7 +8,7 @@ import project.jpa.dto.memberapidto.LoginResponse;
 import project.jpa.repository.MemberRepository;
 
 @Service
-@Transactional(readOnly = true) // 💡 OSIV false 환경에서 읽기 전용 성능 최적화
+@Transactional(readOnly = true) //  OSIV false 환경에서 읽기 전용 성능 최적화
 @RequiredArgsConstructor
 public class MemberQueryService {
 

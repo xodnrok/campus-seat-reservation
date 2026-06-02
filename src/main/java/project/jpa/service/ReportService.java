@@ -48,7 +48,7 @@ public class ReportService {
         Report report = Report.createReport(member, seat, content);
         reportRepository.save(report);
 
-        // 💡 4. [실행 - 상태 변경] 좌석은 '점검 중'으로, 이용 기록은 '종료'로 처리
+        //  4. [실행 - 상태 변경] 좌석은 '점검 중'으로, 이용 기록은 '종료'로 처리
         seat.changeToMaintenance();    // 좌석 상태: USING -> MAINTENANCE
         activeHistory.completeUsage(); // 이용 기록: USING -> COMPLETED 및 종료 시간 기록
 

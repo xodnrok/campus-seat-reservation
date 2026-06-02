@@ -22,14 +22,14 @@ public class SeatQueryService {
     private final UsageHistoryRepository usageHistoryRepository;
 
     /**
-     * FR#6. 실시간 좌석 동적 검색(건물이름, 층수, 장소유형, 좌석의 상태)
+     * FR#6. 통합공간 및 실시간 좌석 검색(건물이름, 층수 , 장소유형 , 좌석의 상태)
      */
     public List<SeatDto> searchSeats(SeatSearchCondition condition) {
         return seatRepository.search(condition);
     }
 
     /**
-     * [관리자] 실시간 이용자 모니터링 페이징 조회
+     * FR#17 [관리자] 실시간 이용자 모니터링 목록 조회 (페이징) API
      */
     public Page<ActiveUserDto> getActiveUsers(SeatSearchCondition condition, Pageable pageable) {
         return usageHistoryRepository.findActiveUsersMonitoring(condition , pageable);

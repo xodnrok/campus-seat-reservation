@@ -17,7 +17,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-//  1. @Version이 있으므로 WHERE 절에 파라미터(?)를 2개(seat_id, version) 받아야 정상 작동 , 삭제요청이 올경우 이걸 동작해
+//  1. @Version이 있으므로 WHERE 절에 파라미터(?)를 2개(seat_id, version) 받아야 정상 작동 , 삭제요청이 올경우 이걸 동작
 @SQLDelete(sql = "UPDATE seat SET is_deleted = true WHERE seat_id = ? AND version = ?")
 //  2. Spring Boot 3 환경에 맞춘 최신 소프트 삭제 필터링 애노테이션 적용 , 앞으로 이 엔티티를 조회하는 모든 SELECT 쿼리 맨 끝에 무조건 이 조건을 강제로 붙임
 @SQLRestriction("is_deleted = false")
