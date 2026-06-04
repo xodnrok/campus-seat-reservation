@@ -576,7 +576,6 @@ class SeatServiceTest {
     void forceStopUsage_Fail_NotFound() {
         // given: 없는 ID (999L)
         Long invalidHistoryId = 999L;
-
         // when & then
         try {
             // 이 로직에서 예외가 터져야 정상
