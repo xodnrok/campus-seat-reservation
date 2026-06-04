@@ -3,6 +3,7 @@ package project.jpa.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import project.jpa.annotation.AdminOnly;
 
 @Controller
 public class ViewController {
@@ -38,6 +39,7 @@ public class ViewController {
      * 4. 관리자 전용 대시보드 (좌석 등록, 시설 제어, 전체 신고내역 처리 등)
      * 접속 주소: localhost:8080/admin
      */
+    @AdminOnly
     @GetMapping("/admin")
     public String admin() {
         return "admin";  // -> src/main/resources/templates/admin.html 을 띄워줌

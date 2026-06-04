@@ -39,6 +39,15 @@ public class UsageHistory extends BaseTimeEntity { //회원과 좌석 사이의 
     @JoinColumn(name = "seat_id" , nullable = false)
     private Seat seat; //어떤 좌석을 사용 했는지
 
+    // 스냅샷 필드: 좌석이 삭제되어도 과거 기록에 이름을 띄워주기 위함
+    private String historyBuildingName;
+
+    private Integer historyFloor;
+
+    private String historySpaceType;
+
+    private String historySeatNumber;
+
     // ================= 비즈니스 로직 & 연관관계 편의 메서드 ================= //
 
     /**
@@ -55,6 +64,12 @@ public class UsageHistory extends BaseTimeEntity { //회원과 좌석 사이의 
         history.startTime = LocalDateTime.now();
 
         history.status = UsageStatus.USING;
+
+        // 예약 당시의 좌석 정보를 스냅샷으로 영구 박제!
+        history.historyBuildingName = seat.getBuildingName();
+        history.historyFloor = seat.getFloor();
+        history.historySpaceType = seat.getSpaceType().getDescription();
+        history.historySeatNumber = seat.getSeatNumber();
 
         return history;
     }

@@ -54,7 +54,7 @@
             font-size: 0.85rem;
             font-weight: 500;
         }
-        /*  비밀번호 눈 모양 아이콘 스타일 */
+        /* 비밀번호 눈 모양 아이콘 스타일 */
         .toggle-password {
             cursor: pointer;
             z-index: 5;
@@ -141,10 +141,36 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    // ----------------------------------------
-    //  주소창에 #join이 있으면 회원가입 탭을 자동으로 열어주는 로직
-    // ----------------------------------------
     document.addEventListener("DOMContentLoaded", function() {
+        // ----------------------------------------
+        // 1. 인터셉터 리다이렉트 에러 처리 로직 (추가된 부분)
+        // ----------------------------------------
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorType = urlParams.get('error');
+
+        if (errorType === 'required') {
+            Swal.fire({
+                icon: 'warning',
+                title: '접근 제한',
+                text: '로그인이 필요한 서비스입니다.',
+                confirmButtonColor: '#0d6efd'
+            });
+            // 알림을 띄운 후 주소창의 ?error=... 꼬리표를 지워서 새로고침 시 다시 뜨지 않게 함
+            window.history.replaceState({}, document.title, window.location.pathname);
+
+        } else if (errorType === 'admin') {
+            Swal.fire({
+                icon: 'error',
+                title: '접근 거부',
+                text: '관리자만 접근할 수 있는 페이지입니다.',
+                confirmButtonColor: '#dc3545'
+            });
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        // ----------------------------------------
+        // 2. 주소창에 #join이 있으면 회원가입 탭을 자동으로 열어주는 로직
+        // ----------------------------------------
         if (window.location.hash === '#join') {
             const joinTab = new bootstrap.Tab(document.getElementById('join-tab'));
             joinTab.show();
@@ -170,7 +196,7 @@
     });
 
     // ----------------------------------------
-    // 1. 로그인 처리 로직
+    // 로그인 처리 로직
     // ----------------------------------------
     document.getElementById('loginForm').addEventListener('submit', function (e) {
         e.preventDefault();
@@ -188,19 +214,17 @@
         .then(response => response.json())
         .then(data => {
             if (data.status === 'SUCCESS') {
-                //  투박한 alert 대신 예쁜 SweetAlert2 팝업 적용
                 Swal.fire({
                     icon: 'success',
                     title: '로그인 성공',
                     text: data.message,
                     confirmButtonColor: '#0d6efd',
-                    timer: 1500, // 1.5초 후 자동 닫힘
+                    timer: 1500,
                     timerProgressBar: true
                 }).then(() => {
                     window.location.href = '/';
                 });
             } else {
-                // 에러 팝업
                 Swal.fire({
                     icon: 'error',
                     title: '로그인 실패',
@@ -216,7 +240,7 @@
     });
 
     // ----------------------------------------
-    // 2. 회원가입 처리 로직
+    // 회원가입 처리 로직
     // ----------------------------------------
     document.getElementById('joinForm').addEventListener('submit', function (e) {
         e.preventDefault();
@@ -236,7 +260,6 @@
         .then(response => response.json())
         .then(data => {
             if (data.status === 'SUCCESS') {
-                // 가입 성공 팝업
                 Swal.fire({
                     icon: 'success',
                     title: '환영합니다!',

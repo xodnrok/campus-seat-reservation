@@ -40,7 +40,6 @@ public class UsageHistoryRepositoryImpl implements UsageHistoryRepositoryCustom{
         // 1. 컨텐츠 조회 쿼리 (페이징 적용: offset, limit)
         List<UsageHistory> content = queryFactory
                 .selectFrom(usageHistory)
-                .join(usageHistory.seat, seat).fetchJoin() // N+1 방지를 위한 fetch join 유지
                 .where(usageHistory.member.id.eq(memberId))
                 .orderBy(usageHistory.startTime.desc())    // 최신순 정렬 유지
                 .offset(pageable.getOffset())              // 시작점 [cite: 8]

@@ -26,15 +26,15 @@ public class UsageHistoryQueryService {
 
         // 2. 트랜잭션이 살아있을 때 안전하게 DTO로 변환하여 반환
         return historyPage.map(history -> new UsageHistoryDto(
-                history.getId(),                        //이용기록 PK
-                history.getSeat().getId(),
-                history.getSeat().getBuildingName(),    //이용한 좌석의 건물이름
-                history.getSeat().getFloor(),
-                history.getSeat().getSpaceType().getDescription(),
-                history.getSeat().getSeatNumber(),      //이용한 좌석의 번호
-                history.getStartTime(),                 //이용한 시작 시간
-                history.getEndTime(),                   //이용이 끝난 시간
-                history.getStatus().getDescription()    //이용기록 상태
+                history.getId(),                            //사용기록 PK
+                history.getSeat().getId(),                  //사용 좌석 PK
+                history.getHistoryBuildingName(),           //사용좌석 건물 이름
+                history.getHistoryFloor(),                  //사용좌석 층수
+                history.getHistorySpaceType(),              //사용좌석 유형
+                history.getHistorySeatNumber(),             //사용좌석 번호
+                history.getStartTime(),                     //사용시작 시간
+                history.getEndTime(),                       //사용종료 시간
+                history.getStatus().getDescription()        //사용기록 상태
         ));
     }
 
@@ -46,16 +46,16 @@ public class UsageHistoryQueryService {
 
         return usageHistoryRepository.findMyActiveHistory(memberId)
                 .map(history -> new UsageHistoryDto(
-                        history.getId(),                                    //이용기록 PK
-                        history.getSeat().getId(),                          //좌석PK
-                        history.getSeat().getBuildingName(),                //건물이름
-                        history.getSeat().getFloor(),                       //건물 층수
-                        history.getSeat().getSpaceType().getDescription(),  //장소 유형
-                        history.getSeat().getSeatNumber(),                  //좌석 번호
-                        history.getStartTime(),                             //사용 시작 시간
-                        history.getEndTime(),                               //사용 종료 시간
-                        history.getStatus().getDescription()                //좌석 사용 상태
+                        history.getId(),                            //사용기록 PK
+                        history.getSeat().getId(),                  //사용 좌석 PK
+                        history.getHistoryBuildingName(),           //사용좌석 건물 이름
+                        history.getHistoryFloor(),                  //사용좌석 층수
+                        history.getHistorySpaceType(),              //사용좌석 유형
+                        history.getHistorySeatNumber(),             //사용좌석 번호
+                        history.getStartTime(),                     //사용시작 시간
+                        history.getEndTime(),                       //사용종료 시간
+                        history.getStatus().getDescription()        //사용기록 상태
                 ))
-                .orElse(null); // 이용 중인 좌석이 없으면 null 반환
+                .orElse(null);
     }
 }
