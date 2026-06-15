@@ -12,6 +12,9 @@ import project.jpa.enums.MemberRole;
 
 public class ViewAuthInterceptor implements HandlerInterceptor {
 
+    /**
+     * F21: 시스템 접근 제어 및 권한 검증
+     */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 

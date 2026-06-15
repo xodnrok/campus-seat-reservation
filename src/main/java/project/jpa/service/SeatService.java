@@ -46,7 +46,7 @@ public class SeatService {
 
 
     /**
-     * FR#20. 등록한 좌석을 수정 , 좌석 기초 정보 및 레이아웃 수정 관리자가 실수로 등록한 정보나 좌석의 위치(행/열)를 수정할 때 사용
+     * FR#19. 등록한 좌석을 수정 , 좌석 기초 정보 및 레이아웃 수정 관리자가 실수로 등록한 정보나 좌석의 위치(행/열)를 수정할 때 사용
      */
     public void updateSeatInfo(Long seatId, String buildingName, Integer floor,SpaceType spaceType,
                                String seatNumber, Integer rowIndex, Integer colIndex) {
@@ -214,7 +214,7 @@ public class SeatService {
     }
 
     /**
-     * FR#21. 등록한 좌석 삭제 기능 (소프트 삭제)
+     * FR#20. 등록한 좌석 삭제 기능 (소프트 삭제)
      * 엔티티의 @SQLDelete 설정에 의해 물리적 삭제(DELETE) 대신 상태 변경(UPDATE is_deleted = true)으로 동작합니다.
      */
     @Transactional

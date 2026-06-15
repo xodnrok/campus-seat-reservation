@@ -29,7 +29,7 @@ public class SeatQueryService {
     }
 
     /**
-     * FR#17 [관리자] 실시간 이용자 모니터링 목록 조회 (페이징) API
+     * FR#16 [관리자] 실시간 이용자 모니터링 목록 조회 (페이징) API
      */
     public Page<ActiveUserDto> getActiveUsers(SeatSearchCondition condition, Pageable pageable) {
         return usageHistoryRepository.findActiveUsersMonitoring(condition , pageable);

@@ -18,7 +18,7 @@ public class SeatBookmarkQueryService {
 
 
     /**
-     * FR#16. 내 즐겨찾기 좌석 목록 조회 (엔티티 노출 차단, 즉시 DTO 변환)
+     * FR#15. 내 즐겨찾기 좌석 목록 조회 (엔티티 노출 차단, 즉시 DTO 변환)
      */
     public Page<BookmarkDto> findMyBookmarks(Long memberId, Pageable pageable) {
 

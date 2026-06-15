@@ -25,7 +25,7 @@ public class SeatBookmarkApiController {
     private final SeatBookmarkQueryService seatBookmarkQueryService;
 
     /**
-     * FR#15. 자주 찾는 좌석 즐겨찾기 추가  토글(등록 및 해제)
+     * FR#14. 자주 찾는 좌석 즐겨찾기 추가  토글(등록 및 해제)
      * 프론트엔드에서 하트 버튼을 누를 때마다 이 API 하나만 호출하면 됩니다.
      */
     @Operation(summary = "회원이 마음에 드는 좌석을 즐겨찾기 가능합니다.", description = "URL로 즐겨찾기할 좌석 ID를 받아옵니다")
@@ -45,7 +45,7 @@ public class SeatBookmarkApiController {
     }
 
     /**
-     * FR#16. 내 즐겨찾기 좌석 목록 조회
+     * FR#15. 내 즐겨찾기 좌석 목록 조회
      */
     @Operation(summary = "회원이 본인이 등록한 즐겨찾기 좌석을 조회 가능합니다.", description = "세션으로 본인의 즐겨찾기 내역을 조회해 옵니다.")
     @GetMapping("/api/bookmarks/me")

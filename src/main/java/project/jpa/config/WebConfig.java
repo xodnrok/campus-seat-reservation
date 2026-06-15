@@ -9,6 +9,10 @@ import project.jpa.interceptor.ViewAuthInterceptor;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    /**
+     * F21: 시스템 접근 제어 및 권한 검증
+     */
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 

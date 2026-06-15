@@ -20,7 +20,7 @@ public class ReportQueryService {
 
 
     /**
-     * 2. [사용자용] 내 신고 내역 조회 (엔티티 노출 차단, 즉시 DTO 변환)
+     * 2. FR#17. [사용자용] 내 신고 내역 조회 (엔티티 노출 차단, 즉시 DTO 변환)
      */
     public Page<MyReportDto> findMyReports(Long memberId, Pageable pageable) {
 
@@ -41,7 +41,7 @@ public class ReportQueryService {
     }
 
     /**
-     * 3. [관리자용] 상태별 전체 신고 내역 조회 (엔티티 노출 차단, 즉시 DTO 변환)
+     * 3. FR#18. [관리자용] 상태별 전체 신고 내역 조회 (엔티티 노출 차단, 즉시 DTO 변환)
      */
     public Page<AdminReportDto> findReportsByStatus(ReportStatus status, Pageable pageable) {
 

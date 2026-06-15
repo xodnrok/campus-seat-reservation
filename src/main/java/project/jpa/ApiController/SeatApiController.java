@@ -177,7 +177,7 @@ public class SeatApiController {
     }
 
     /**
-     * FR#20. 등록한 좌석을 수정 , 좌석 기초 정보 및 레이아웃 수정 관리자가 실수로 등록한 정보나 좌석의 위치(행/열)를 수정할 때 사용
+     * FR#19. 등록한 좌석을 수정 , 좌석 기초 정보 및 레이아웃 수정 관리자가 실수로 등록한 정보나 좌석의 위치(행/열)를 수정할 때 사용
      */
     @Operation(summary = "관리자가 등록한 좌석을 수정 합니다.", description = "좌석 ID , 건물이름, 층수 , 공간유형 , 좌석번호 , 행 , 열 값을 받아서 좌석을 만듭니다.")
     @PutMapping("/api/seats/{seatId}")
@@ -194,7 +194,7 @@ public class SeatApiController {
     }
 
     /**
-     * FR#21. 등록한 좌석 삭제 기능 (소프트 삭제)
+     * FR#20. 등록한 좌석 삭제 기능 (소프트 삭제)
      */
     @Operation(summary = "관리자가 등록한 좌석을 삭제합니다.(소프트삭제)", description = "삭제할 좌석 ID를 URL로 받아옵니다.")
     @DeleteMapping("/api/seats/{seatId}")
@@ -225,7 +225,7 @@ public class SeatApiController {
     }
 
     /**
-     * FR#17. [관리자] 실시간 이용자 모니터링 목록 조회 (페이징) API
+     * FR#16. [관리자] 실시간 이용자 모니터링 목록 조회 (페이징) API
      */
     @Operation(summary = "관리자가 해당공간에서 좌석을 사용중인 사용자를 확인가능합니다.",
             description = "건물이름, 층수 , 공간유형 , 좌석상태를 입력해서 검색합니다.")

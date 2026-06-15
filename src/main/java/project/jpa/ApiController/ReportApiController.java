@@ -56,7 +56,7 @@ public class ReportApiController {
     }
 
     /**
-     * FR#18. 내 신고 내역 조회 (마이페이지용)
+     * FR#17. 내 신고 내역 조회 (마이페이지용)
      */
     @Operation(summary = "나의 신고 내역 조회", description = "로그인한 회원의 신고한 내역을 조회합니다.")
     @GetMapping("/api/reports/me")
@@ -75,7 +75,7 @@ public class ReportApiController {
     // ========================================== //
 
     /**
-     * FR#19. 관리자 - 상태별 전체 신고 내역 조회 (접수됨, 수리중, 완료 등)
+     * FR#18. 관리자 - 상태별 전체 신고 내역 조회 (접수됨, 수리중, 완료 등)
      */
     @Operation(summary = "관리자가 회원의 신고를 상태별로 전체 조회", description = " RECEIVED(\"접수 대기\")," +
             "    IN_PROGRESS(\"점검 중\")," +

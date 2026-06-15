@@ -6,6 +6,6 @@ import project.jpa.domain.SeatBookmark;
 
 public interface SeatBookmarkRepositoryCustom {
 
-    //  FR#16. 내 즐겨찾기 좌석 목록 페이징 조회
+    //  FR#15. 내 즐겨찾기 좌석 목록 페이징 조회
     Page<SeatBookmark> findMyBookmarks(Long memberId, Pageable pageable);
 }
