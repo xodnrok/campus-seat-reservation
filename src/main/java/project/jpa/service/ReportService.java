@@ -28,7 +28,7 @@ public class ReportService {
     private final UsageHistoryRepository usageHistoryRepository;
 
     /**
-     * FR#14. 시설 고장 및 불편 신고 접수(회원이 앉은 좌석을 신고시 회원의 기록을 완료시간,완료로 바꾸고 좌석상태도 점검중으로 바꾼다.)
+     * FR#13. 시설 고장 및 불편 신고 접수(회원이 앉은 좌석을 신고시 회원의 기록을 완료시간,완료로 바꾸고 좌석상태도 점검중으로 바꾼다.)
      */
     public Long createReport(Long memberId, Long seatId, String content) {
 

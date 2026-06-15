@@ -230,7 +230,7 @@ public class SeatService {
 
 
     /**
-     * FR#11 [관리자] 다건 좌석 그리드 일괄 등록 API
+     * FR#12 [관리자] 다건 좌석 그리드 일괄 등록 API
      * 프론트엔드에서 계산된 좌석 배열(List)을 받아 한 번에 저장
      */
     @Transactional

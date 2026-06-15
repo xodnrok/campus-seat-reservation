@@ -38,7 +38,7 @@ public class ReportApiController {
     // ========================================== //
 
     /**
-     * FR#14. 시설 고장 및 불편 신고 접수
+     * FR#13. 시설 고장 및 불편 신고 접수
      */
     @Operation(summary = "시설 고장 및 불편 신고 접수", description = "신고할 좌석 ID , 신고할 내용을 받아 신고를 접수합니다.")
     @PostMapping("/api/reports")

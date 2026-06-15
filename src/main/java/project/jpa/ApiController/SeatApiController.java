@@ -208,7 +208,7 @@ public class SeatApiController {
     }
 
     /**
-     * FR#11 [관리자] 다건 좌석 그리드 일괄 등록 API
+     * FR#12 [관리자] 다건 좌석 그리드 일괄 등록 API
      * 프론트엔드에서 계산된 좌석 배열(List)을 받아 한 번에 저장
      */
     @Operation(summary = "관리자가 여러개의 좌석을 한번에 등록합니다.", description = "건물이름, 층수 , 공간유형 , 좌석번호 , 행 , 열 값을 받아서 좌석을 만듭니다.")
