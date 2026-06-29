@@ -59,4 +59,9 @@
 
 * [<img width="1107" height="650" alt="스크린샷 2026-06-15 212129" src="https://github.com/user-attachments/assets/838eba33-1215-4f79-9ea2-8d0e05a896af" />](#) 
 * [<img width="1438" height="1257" alt="졸작 ERD" src="https://github.com/user-attachments/assets/b6f7b406-503d-4a2d-ab45-146b77fdac7a" />](#)
+* 자세한 동작화면 , 정보는 보고서에 자세하게 설명되어있습니다. [커넥트팀_결과 보고서 양식.pdf](https://github.com/user-attachments/files/29452945/_.pdf)
+
+### 🎥 프로젝트 시연 영상
+[![통합 좌석 관리 시스템 시연 영상](https://img.youtube.com/vi/6_mDB6uiwzQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=6_mDB6uiwzQ)
+> 👆 **위 이미지를 클릭하시면 유튜브 시연 영상으로 이동합니다.**
 * 자세한 트러블슈팅 및 기술적 고민의 흔적은 개인 기술 블로그에서 확인하실 수 있습니다. (👉 [Tistory 블로그 링크 삽입]) 노션 수정하기
