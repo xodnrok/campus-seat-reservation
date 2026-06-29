@@ -64,4 +64,10 @@
 ### 🎥 프로젝트 시연 영상
 [![통합 좌석 관리 시스템 시연 영상](https://img.youtube.com/vi/6_mDB6uiwzQ/maxresdefault.jpg)](https://www.youtube.com/watch?v=6_mDB6uiwzQ)
 > 👆 **위 이미지를 클릭하시면 유튜브 시연 영상으로 이동합니다.**
-* 자세한 트러블슈팅 및 기술적 고민의 흔적은 개인 기술 블로그에서 확인하실 수 있습니다. (👉 [Tistory 블로그 링크 삽입]) 노션 수정하기
+
+## 📂 프로젝트 아키텍처 및 산출물
+
+* 🔗 **[상세 포트폴리오 (Notion) 바로가기]**(https://app.notion.com/p/3067e2c22350828a8ff901212bb86576?source=copy_link)
+  > 시스템의 상세 아키텍처, 기술 스택, 그리고 핵심 트러블슈팅 과정이 모두 담긴 통합 포트폴리오입니다.
+* 📝 **[개발 기술 블로그 (Tistory) 바로가기]**(https://xodnrok.tistory.com/)
+  > 백엔드 학습에 대한 정리 블로그입니다.
