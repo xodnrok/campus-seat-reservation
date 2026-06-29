@@ -13,7 +13,7 @@
 
 **DevOps & QA**
 - **GitHub Actions** (CI Pipeline 자동화)
-- **JUnit5 / Mockito** (60+ 단위 및 통합 테스트)
+- **JUnit5** (60+ 단위 및 통합 테스트)
 - **Swagger (SpringDoc)** (API 명세 자동화)
 
 **Frontend**
