@@ -74,7 +74,7 @@
 
 ## 📂 프로젝트 아키텍처 및 산출물
 
-* 🔗 **[상세 포트폴리오 (Notion) 바로가기]**(https://app.notion.com/p/3067e2c22350828a8ff901212bb86576?source=copy_link)
+* 🔗 **[상세 포트폴리오 (Notion) 바로가기]**(https://app.notion.com/p/3067e2c22350828a8ff901212bb86576?p=2e97e2c2235082479b9c81ede08d8adf&pm=c)
   > 시스템의 상세 아키텍처, 기술 스택, 그리고 핵심 트러블슈팅 과정이 모두 담긴 통합 포트폴리오입니다.
 * 📝 **[개발 기술 블로그 (Tistory) 바로가기]**(https://xodnrok.tistory.com/)
   > 백엔드 학습에 대한 정리 블로그입니다.
